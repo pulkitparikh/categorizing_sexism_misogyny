@@ -8,6 +8,11 @@ from neuralApproaches import *
 sys.setrecursionlimit(10000)
 conf_dict_list, conf_dict_com = load_config(sys.argv[1])
 os.environ["CUDA_VISIBLE_DEVICES"] = conf_dict_com['GPU_ID']
+from keras.backend.tensorflow_backend import set_session
+import tensorflow as tf
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+set_session(tf.Session(config=config))
 
 f_res = open(conf_dict_com["output_folder_name"] + conf_dict_com["res_filename"], 'a')
 tsv_path = conf_dict_com["output_folder_name"] + conf_dict_com["res_tsv_filename"]

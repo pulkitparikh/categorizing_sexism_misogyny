@@ -1,0 +1,11 @@
+data/*.txt
+data/*.csv
+data/*.tsv
+data/*.zip
+data/*.sh
+data/word_sent_embed/
+results/
+saved/
+*.pyc
+*pycache*
+

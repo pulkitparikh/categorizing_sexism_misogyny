@@ -78,8 +78,10 @@ def use_embed_posts(posts, max_sent_cnt, embed_dim, data_fold_path):
 	return posts_arr
 
 def use_flat_embed_posts(posts, embed_dim, data_fold_path):
+	use_batch_size = 64
 	config = tf.ConfigProto()
 	config.gpu_options.allow_growth = True
+	posts_arr = np.zeros((len(posts), embed_dim))
 	with tf.Graph().as_default():
 		embed = hub.Module("https://tfhub.dev/google/universal-sentence-encoder-large/3")
 		messages = tf.placeholder(dtype=tf.string)
@@ -87,7 +89,9 @@ def use_flat_embed_posts(posts, embed_dim, data_fold_path):
 
 		with tf.Session(config=config) as session:
 			session.run([tf.global_variables_initializer(), tf.tables_initializer()])
-			posts_arr = session.run(output, feed_dict={messages: posts})
+			for ind in range(0, len(posts), use_batch_size):
+				end_ind = min(ind+use_batch_size, len(posts))
+				posts_arr[ind:end_ind, :] = session.run(output, feed_dict={messages: posts[ind:end_ind]})
 	return posts_arr
 
 def infersent_embed_posts(posts, max_sent_cnt, embed_dim, data_fold_path):
