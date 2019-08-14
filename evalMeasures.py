@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from loadPreProc import NUM_CLASSES, FOR_LMAP
 
@@ -71,7 +72,9 @@ def write_results(metr_dict, f_res):
 	f_res.write("Inverse Hamming Loss: %.3f\n" % metr_dict['avg_ihl'])
 
 def insights_results(pred_vals, true_vals, posts, sen_posts, train_labels, dyn_fname_part, out_fold):
-	dyn_fname_inst = ("%sinst/%s.txt" % (out_fold, dyn_fname_part))
+	inst_fold_str = ("%sinst/" % (out_fold))
+	os.makedirs(inst_fold_str, exist_ok=True)
+	dyn_fname_inst = ("%s%s.txt" % (inst_fold_str, dyn_fname_part))
 	f_err_inst = open(dyn_fname_inst, 'w')
 	f_err_inst.write("post\t# sents\t# words\t# words/sen\tpred cats\tactu cats\tJaccard\n")
 	for pr, ac, post, sen_post in zip(pred_vals, true_vals, posts, sen_posts):

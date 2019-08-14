@@ -14,7 +14,14 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 set_session(tf.Session(config=config))
 
-f_res = open(conf_dict_com["output_folder_name"] + conf_dict_com["res_filename"], 'a')
+os.makedirs(conf_dict_com["output_folder_name"], exist_ok=True)
+os.makedirs(conf_dict_com["save_folder_name"], exist_ok=True)
+res_path = conf_dict_com["output_folder_name"] + conf_dict_com["res_filename"]
+if os.path.isfile(res_path):
+    f_res = open(res_path, 'a')
+else:
+    f_res = open(res_path, 'w')
+
 tsv_path = conf_dict_com["output_folder_name"] + conf_dict_com["res_tsv_filename"]
 if os.path.isfile(tsv_path):
     f_tsv = open(tsv_path, 'a')

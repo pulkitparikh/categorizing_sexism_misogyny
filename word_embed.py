@@ -264,7 +264,7 @@ def word_featurize(word_feats_raw, model_type, data_dict, poss_word_feats_emb_di
 					ling_word_feat_posts(data_dict['text'], data_dict['max_post_length'], emotion_embed_dict, neut, sentiment_embed_dict, sen_neut, perma_embed_dict, perma_neut, word_embed_dict, word_neut, ling_word_vec_dim, ad_word_feats['filepath'])
 			elif word_feat_name == 'elmo':
 				ad_word_feats['filepath'] = save_fold_path + 'word_vecs~' + word_feat_name + '/' + str(var_tune) + '/'
-				if not os.path.isfile(ad_word_feats['filepath'] + '0.npy'):
+				if (use_saved_word_feats == False) or (not os.path.isfile(ad_word_feats['filepath'] + '0.npy')):
 					os.makedirs(ad_word_feats['filepath'], exist_ok=True)
 					elmo = ElmoEmbedder()
 					elmo_save_no_pad(data_dict, elmo, ad_word_feats['filepath'], poss_word_feats_emb_dict[word_feat_name])
