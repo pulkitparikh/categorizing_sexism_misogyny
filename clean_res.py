@@ -5,6 +5,14 @@ only_inc_best_list = [
 ]
 #('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11', '', 'di', 'True'), ('hier_fuse', 'elm_cnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_rnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_cnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_rnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_cnn_11', '', 'di', 'True'), ('uni_sent', '', 'bert_pre_1', 'di', 'True'), ('uni_sent', '', 'bert_1', 'di', 'True'), ('uni_sent', '', 'use_1', 'di', 'True'), ('uni_sent', '', 'infersent_1', 'di', 'True')]
 remove_list = [
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+
 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2+use_3', 'di', 'True', True),
 	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_pre_3', 'di', 'True', True),
 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True', True),
@@ -176,7 +184,11 @@ for row in rows:
 	model_key = (row['model'], row['word feats'], row['sent feats'], row['trans'], row['class imb'], att_flag)
 
 	if row['test mode'] == "True":
-		model_dic_test[model_key] = row
+		if model_key in model_dic_test:
+			print("multiple hyper params run in the test mode!")
+			exit()
+		else:
+			model_dic_test[model_key] = row
 		# if model_key in model_dic_test:
 		# 	if row['GPU'] == '0':
 		# 		model_dic_test[model_key] = row
