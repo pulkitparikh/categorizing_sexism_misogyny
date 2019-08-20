@@ -10,9 +10,13 @@ remove_list = [
 	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
 	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
 	('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	# ('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
-	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~comb_cnn_rnn~1~~glove~comb_cnn_rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~comb_cnn_rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
 
+	('hier_fuse', 'elmo~c_rnn~11~~glove~c_rnn~21~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2+use_3', 'di', 'True', True),
 	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_pre_3', 'di', 'True', True),
 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True', True),
@@ -97,6 +101,7 @@ input_res_file_2 = 'results/tsv2.txt'
 val_res_file = 'results/val_tsv.txt'
 test_res_file = 'results/test_tsv.txt'
 remove_list.extend(useless_list)
+# remove_list = []
 
 def rem_dupli_text(f_name_1, f_name_2):
 	with open(f_name_2,'r') as res_tsv:

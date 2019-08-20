@@ -6,71 +6,100 @@ from keras import optimizers
 from keras.engine.topology import Layer
 from keras import initializers
 
-def sen_embed(enc_algo, sen_word_emb, word_cnt_sent, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs):
+def sen_embed(enc_algo, sen_word_emb, word_cnt_sent, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs):
     if enc_algo == "rnn":
         if att_dim > 0:
-            rnn_sen_mod, att_mod = rnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type)
+            rnn_sen_mod, att_mod = rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type)
             rnn_sen_emb_output = TimeDistributed(rnn_sen_mod)(sen_word_emb)    
             att_outputs.append(TimeDistributed(att_mod)(sen_word_emb))
             # rnn_sen_mod.summary()
         else:
-            rnn_sen_emb_output = TimeDistributed(rnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type))(sen_word_emb)    
+            rnn_sen_emb_output = TimeDistributed(rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type))(sen_word_emb)    
         return [rnn_sen_emb_output], att_outputs
     elif enc_algo == "cnn":
-        cnn_sen_mod = cnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes) 
+        cnn_sen_mod = cnn_sen_embed(word_cnt_sent, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes) 
         # cnn_sen_mod.summary()
         return [TimeDistributed(cnn_sen_mod)(sen_word_emb)], att_outputs
+    elif enc_algo == 'c_rnn':
+        if att_dim > 0:
+            c_rnn_sen_mod, att_mod = c_rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes)
+            c_rnn_sen_emb_output = TimeDistributed(c_rnn_sen_mod)(sen_word_emb)    
+            att_outputs.append(TimeDistributed(att_mod)(sen_word_emb))
+            # c_rnn_sen_mod.summary()
+        else:
+            c_rnn_sen_emb_output = TimeDistributed(c_rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes))(sen_word_emb)    
+        return [c_rnn_sen_emb_output], att_outputs
     else:
         if att_dim > 0:
-            rnn_sen_mod, att_mod = rnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type)
+            rnn_sen_mod, att_mod = rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type)
             rnn_sen_emb_output = TimeDistributed(rnn_sen_mod)(sen_word_emb)    
             att_outputs.append(TimeDistributed(att_mod)(sen_word_emb))
         else:
-            rnn_sen_emb_output = TimeDistributed(rnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type))(sen_word_emb)    
-        cnn_sen_emb_output = TimeDistributed(cnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes))(sen_word_emb)
+            rnn_sen_emb_output = TimeDistributed(rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type))(sen_word_emb)    
+        cnn_sen_emb_output = TimeDistributed(cnn_sen_embed(word_cnt_sent, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes))(sen_word_emb)
         
         if enc_algo == "comb_cnn_rnn":
             return [concatenate([cnn_sen_emb_output, rnn_sen_emb_output])], att_outputs
         elif enc_algo == "sep_cnn_rnn":
             return [cnn_sen_emb_output, rnn_sen_emb_output], att_outputs
 
-def flat_embed(enc_algo, word_emb_seq, word_cnt_post, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs):
+def flat_embed(enc_algo, word_emb_seq, word_cnt_post, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs):
     if enc_algo == "rnn":
         if att_dim > 0:
-            rnn_mod, att_mod = rnn_sen_embed(word_cnt_post, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type)
+            rnn_mod, att_mod = rnn_sen_embed(word_cnt_post, word_emb_len, rnn_dim, att_dim, rnn_type)
             att_outputs.append(att_mod(word_emb_seq))
         else:
-            rnn_mod = rnn_sen_embed(word_cnt_post, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type)
+            rnn_mod = rnn_sen_embed(word_cnt_post, word_emb_len, rnn_dim, att_dim, rnn_type)
         # rnn_mod.summary()
         return rnn_mod(word_emb_seq), att_outputs
     elif enc_algo == "cnn":
-        cnn_mod = cnn_sen_embed(word_cnt_post, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes)
+        cnn_mod = cnn_sen_embed(word_cnt_post, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes)
         # cnn_mod.summary()
         return cnn_mod(word_emb_seq), att_outputs
+    elif enc_algo == "c_rnn":
+        if att_dim > 0:
+            c_rnn_mod, att_mod = c_rnn_sen_embed(word_cnt_post, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes)
+            att_outputs.append(att_mod(word_emb_seq))
+        else:
+            c_rnn_mod = c_rnn_sen_embed(word_cnt_post, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes)
+        # c_rnn_mod.summary()
+        return c_rnn_mod(word_emb_seq), att_outputs
     elif enc_algo == "comb_cnn_rnn":
         if att_dim > 0:
-            rnn_mod, att_mod = rnn_sen_embed(word_cnt_post, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type)
+            rnn_mod, att_mod = rnn_sen_embed(word_cnt_post, word_emb_len, rnn_dim, att_dim, rnn_type)
             rnn_emb_output = rnn_mod(word_emb_seq)
             att_outputs.append(att_mod(word_emb_seq))
         else:
-            rnn_emb_output = rnn_sen_embed(word_cnt_post, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type)(word_emb_seq)
-        cnn_emb_output = cnn_sen_embed(word_cnt_post, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes)(word_emb_seq)
+            rnn_emb_output = rnn_sen_embed(word_cnt_post, word_emb_len, rnn_dim, att_dim, rnn_type)(word_emb_seq)
+        cnn_emb_output = cnn_sen_embed(word_cnt_post, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes)(word_emb_seq)
 
         return concatenate([cnn_emb_output, rnn_emb_output]), att_outputs
 
-def rnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, rnn_dim, att_dim, rnn_type):
+def rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type):
     w_emb_input_seq = Input(shape=(word_cnt_sent, word_emb_len), name='emb_input')
+    return rnn_generic_embed(w_emb_input_seq, w_emb_input_seq, rnn_dim, att_dim, rnn_type)
+
+def c_rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes):
+    w_emb_input_seq = Input(shape=(word_cnt_sent, word_emb_len), name='emb_input')
+    conv_l_list = []
+    for k in kernel_sizes:
+        conv_t = Conv1D(num_cnn_filters, k, padding='same', activation='relu')(w_emb_input_seq)
+        conv_l_list.append(conv_t)
+    conc_mat = concatenate(conv_l_list)
+    return rnn_generic_embed(w_emb_input_seq, conc_mat, rnn_dim, att_dim, rnn_type)
+
+def rnn_generic_embed(w_emb_input_seq, seq_for_rnn, rnn_dim, att_dim, rnn_type):    
     if rnn_type == 'lstm':
-        blstm_l = Bidirectional(LSTM(rnn_dim, return_sequences=(att_dim > 0)))(w_emb_input_seq)
-    else:
-        blstm_l = Bidirectional(GRU(rnn_dim, return_sequences=(att_dim > 0)))(w_emb_input_seq)
+        blstm_l = Bidirectional(LSTM(rnn_dim, return_sequences=(att_dim > 0)))(seq_for_rnn)
+    elif rnn_type == 'gru':
+        blstm_l = Bidirectional(GRU(rnn_dim, return_sequences=(att_dim > 0)))(seq_for_rnn)
     if att_dim > 0:
         blstm_l, att_w = attLayer_hier(att_dim)(blstm_l)
         return Model(w_emb_input_seq, blstm_l), Model(w_emb_input_seq, att_w)
     else:
         return Model(w_emb_input_seq, blstm_l)
 
-def cnn_sen_embed(word_cnt_sent, word_emb_len, dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes):
+def cnn_sen_embed(word_cnt_sent, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes):
     w_emb_input_seq = Input(shape=(word_cnt_sent, word_emb_len), name='emb_input')
     conv_l_list = []
     for k in kernel_sizes:
@@ -88,7 +117,7 @@ def post_embed(sen_emb, rnn_dim, att_dim, rnn_type, stack_rnn_flag, att_outputs)
         blstm_l = Bidirectional(LSTM(rnn_dim, return_sequences=(att_dim > 0)))(sen_emb)
         if stack_rnn_flag:
             blstm_l = Bidirectional(LSTM(rnn_dim, return_sequences=(att_dim > 0)))(blstm_l)
-    else:
+    elif rnn_type == 'gru':
         blstm_l = Bidirectional(GRU(rnn_dim, return_sequences=(att_dim > 0)))(sen_emb)
         if stack_rnn_flag:
             blstm_l = Bidirectional(GRU(rnn_dim, return_sequences=(att_dim > 0)))(blstm_l)
@@ -146,7 +175,7 @@ def hier_fuse(sent_cnt, word_cnt_sent, rnn_dim, att_dim, word_feats, sen_enc_fea
     
     for my_dict in p1_dict.values():
         my_dict["sen_word_emb"] = concatenate(my_dict["comb_feature_list"]) if len(my_dict["comb_feature_list"]) > 1 else my_dict["comb_feature_list"][0]
-        sen_emb_list, att_outputs = sen_embed(my_dict["enc_algo"], my_dict["sen_word_emb"], word_cnt_sent, my_dict["word_emb_len"], dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs)
+        sen_emb_list, att_outputs = sen_embed(my_dict["enc_algo"], my_dict["sen_word_emb"], word_cnt_sent, my_dict["word_emb_len"], num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs)
         for ind, sen_emb in enumerate(sen_emb_list):
             add_sen_emb_p2(sen_emb, my_dict["stage2"][ind], p2_dict)
 
@@ -185,7 +214,7 @@ def flat_fuse(word_cnt_post, rnn_dim, att_dim, word_feats, sen_enc_feats, dropO1
     post_vec_list = []    
     for my_dict in p_dict.values():
         my_dict["word_emb"] = concatenate(my_dict["comb_feature_list"]) if len(my_dict["comb_feature_list"]) > 1 else my_dict["comb_feature_list"][0]
-        flat_emb, att_outputs = flat_embed(my_dict["enc_algo"], my_dict["word_emb"], word_cnt_post, my_dict["word_emb_len"], dropO1, num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs)
+        flat_emb, att_outputs = flat_embed(my_dict["enc_algo"], my_dict["word_emb"], word_cnt_post, my_dict["word_emb_len"], num_cnn_filters, max_pool_k_val, kernel_sizes, rnn_dim, att_dim, rnn_type, att_outputs)
         post_vec_list.append(flat_emb)
 
     for sen_enc_feat in sen_enc_feats:
@@ -204,35 +233,6 @@ def apply_dense(input_seq, dropO2, post_vec, nonlin, out_vec_size):
     dr2_l = Dropout(dropO2)(post_vec)
     out_vec = Dense(out_vec_size, activation=nonlin)(dr2_l)
     return Model(input_seq, out_vec)
-
-def c_bilstm(word_cnt_post, word_f, rnn_dim, att_dim, dropO1, dropO2, nonlin, out_vec_size, rnn_type, num_cnn_filters, kernel_sizes):
-    if 'embed_mat' in word_f:
-        input_seq, embedded_seq = tunable_embed_apply(word_cnt_post, len(word_f['embed_mat']), word_f['embed_mat'])
-        dr1_l = Dropout(dropO1)(embedded_seq)
-    else:
-        input_seq = Input(shape=(word_cnt_post, word_f['dim_shape'][-1]))
-        dr1_l = Dropout(dropO1)(input_seq)
-
-    conv_l_list = []
-    for k in kernel_sizes:
-        conv_t = Conv1D(num_cnn_filters, k, padding='same', activation='relu')(dr1_l)
-        conv_l_list.append(conv_t)
-    conc_mat = concatenate(conv_l_list)
-    return rnn_dense_apply(conc_mat, input_seq, rnn_dim, att_dim, dropO2, nonlin, out_vec_size, rnn_type), None
-
-def uni_sent(sent_cnt, rnn_dim, att_dim, dropO1, dropO2, nonlin, out_vec_size, rnn_type, given_sen_enc_feat):
-    aux_input_seq = Input(shape=(sent_cnt, given_sen_enc_feat['feats'].shape[-1]), name='sen_input')
-    aux_dr1 = Dropout(dropO1)(aux_input_seq)
-    return rnn_dense_apply(aux_dr1, aux_input_seq, rnn_dim, att_dim, dropO2, nonlin, out_vec_size, rnn_type), None
-
-def rnn_dense_apply(rnn_seq, input_seq, rnn_dim, att_dim, dropO2, nonlin, out_vec_size, rnn_type):
-    if rnn_type == 'lstm':
-        blstm_l = Bidirectional(LSTM(rnn_dim, return_sequences=(att_dim > 0)))(rnn_seq)
-    else:
-        blstm_l = Bidirectional(GRU(rnn_dim, return_sequences=(att_dim > 0)))(rnn_seq)
-    if att_dim > 0:
-        blstm_l, att_w = attLayer_hier(att_dim)(blstm_l)
-    return apply_dense(input_seq, dropO2, blstm_l, nonlin, out_vec_size)
 
 def tunable_embed_apply(word_cnt_post, vocab_size, embed_mat, word_feat_name):
     input_seq = Input(shape=(word_cnt_post,), name=word_feat_name+'_t')
@@ -352,14 +352,10 @@ def get_model(m_type, word_cnt_post, sent_cnt, word_cnt_sent, word_feats, sen_en
         model, att_mod = flat_fuse(word_cnt_post, rnn_dim, att_dim, word_feats, sen_enc_feats, dropO1, dropO2, nonlin, out_vec_size, rnn_type, stack_rnn_flag, num_cnn_filters, max_pool_k_val, kernel_sizes)
     elif m_type == 'hier_fuse':
         model, att_mod = hier_fuse(sent_cnt, word_cnt_sent, rnn_dim, att_dim, word_feats, sen_enc_feats, dropO1, dropO2, nonlin, out_vec_size, rnn_type, stack_rnn_flag, num_cnn_filters, max_pool_k_val, kernel_sizes)
-    elif m_type == 'c_bilstm':
-        model, att_mod = c_bilstm(word_cnt_post, word_feats[0], rnn_dim, 0, dropO1, dropO2, nonlin, out_vec_size, rnn_type, num_cnn_filters, kernel_sizes)
-    elif m_type == 'uni_sent':
-        model, att_mod = uni_sent(sent_cnt, rnn_dim, att_dim, dropO1, dropO2, nonlin, out_vec_size, rnn_type, sen_enc_feats[0])
     else:
         print("ERROR: No model named %s" % m_type)
-        return None, None
-
+        exit()
+        
     adam = optimizers.Adam(lr=learn_rate)
     model.compile(loss=loss_func, optimizer=adam)
     # model.summary()

@@ -37,7 +37,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
                 m_ind = dif.argmax()
                 y_pred[ind_row, s_indices[:m_ind+1]] = 1
                 # y_pred[ind_row, row > thresh*max(row)] = 1  
-        else:
+        elif prob_trans_type == "br":
             mod_op = np.squeeze(mod_op, -1)
             y_pred = np.rint(mod_op).astype(int)
             sum_br_lists += y_pred
@@ -51,7 +51,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
         pred_vals = powerset_vec_to_label_lists(y_pred_list[0], bac_map)
     elif prob_trans_type == "di" or prob_trans_type == "dc":        
         pred_vals = di_op_to_label_lists(y_pred_list[0])
-    else:
+    elif prob_trans_type == "br":
         for i in range(len(true_vals)):
             if sum_br_lists[i] == 0:
                 y_pred_list[arg_max_br_lists[i]][i] = 1
@@ -122,13 +122,9 @@ def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num
         test_generator = TestGenerator(np.arange(data_dict['test_st_ind'], data_dict['test_en_ind']), word_feats, sent_enc_feats, data_dict, batch_size)
         mod_op = model.predict_generator(generator=test_generator, verbose=1, use_multiprocessing=False, workers=1)
         if gen_att and (att_mod is not None):
-            os.makedirs(save_folder_name + fname_part, exist_ok=True)
             att_op = att_mod.predict_generator(generator=test_generator, verbose=1, use_multiprocessing=False, workers=1)
             if type(att_op) != list:
                 att_op = [att_op]
-            fname_att_op = ("%s%s/att_op~%d~%d.pickle" % (save_folder_name, fname_part, m_ind, run_ind))
-            with open(fname_att_op, 'wb') as f:
-                pickle.dump(att_op, f)
 
         if save_model:    
             print("saving model o/p")
@@ -138,6 +134,10 @@ def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num
             if run_ind == 0 and m_ind == 0:
                 with open("%s%s/mod_sum.txt" % (save_folder_name, fname_part),'w') as fh:
                     model.summary(print_fn=lambda x: fh.write(x + '\n'))                                                                
+            if gen_att:
+                fname_att_op = ("%s%s/att_op~%d~%d.pickle" % (save_folder_name, fname_part, m_ind, run_ind))
+                with open(fname_att_op, 'wb') as f:
+                    pickle.dump(att_op, f)
         K.clear_session()
     return mod_op, att_op
 
@@ -160,7 +160,7 @@ def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, p
             nonlin = 'softmax'
             out_vec_size = num_classes_var
             cw_list = [None]
-        else:
+        elif prob_trans_type == "br":    
             nonlin = 'sigmoid'
             out_vec_size = 1
             cw_list = [None]*len(trainY_noncat_list)    
@@ -173,7 +173,7 @@ def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, p
                 cw_list = [cw_arr]
             elif prob_trans_type == "dc":
                 cw_list = [weights_cat(trainY_noncat_list[0])]
-            else:
+            elif prob_trans_type == "lp" or prob_trans_type == "br": 
                 cw_list = []
                 loss_func_list = []
                 for trainY_noncat in trainY_noncat_list:
@@ -193,7 +193,7 @@ def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, p
                 loss_func_list.append(multi_binary_loss(cw_arr))
             elif prob_trans_type == "dc":
                 loss_func_list.append(multi_cat_w_loss(cw_arr))
-            else:
+            elif prob_trans_type == "br":    
                 loss_func_list.append(br_binary_loss(cw_arr))
     else:
         if prob_trans_type == "lp":
@@ -202,7 +202,7 @@ def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, p
             loss_func_list = ['binary_crossentropy']
         elif prob_trans_type == "dc":
             loss_func_list = [multi_cat_loss()]
-        else:
+        elif prob_trans_type == "br":    
             loss_func_list = ['binary_crossentropy']*len(trainY_noncat_list)
 
     return loss_func_list, nonlin, out_vec_size, cw_list
@@ -219,13 +219,13 @@ def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path):
             print("num of LP classes: ", num_classes_var)
             trainY_noncat_list = [lp_trainY]
             trainY_list = [to_categorical(lp_trainY, num_classes=num_classes_var)]
-        elif prob_trans_type == "di" or prob_trans_type == "dc":        
+        elif prob_trans_type == "di" or prob_trans_type == "dc":
             num_classes_var = NUM_CLASSES
             trainY_list = [trans_labels_multi_hot(data_trainY)]
             print("num of direct classes: ", num_classes_var)
             bac_map = None
             trainY_noncat_list = list(trainY_list)
-        else:    
+        elif prob_trans_type == "br":    
             trainY_list = trans_labels_BR(data_trainY)
             num_classes_var = 2
             bac_map = None

@@ -207,6 +207,9 @@ def tokenize_vocab(train_data):
 
 def word_featurize(word_feats_raw, model_type, data_dict, poss_word_feats_emb_dict, use_saved_word_feats, save_word_feats, data_fold_path, save_fold_path, test_mode):
 	max_num_word_feats = 4
+	if len(word_feats_raw) > max_num_word_feats:
+		print("too many word features!")
+		exit()
 	max_num_attributes = 4
 	word_feats = []
 	var_model_hier = is_model_hier(model_type)

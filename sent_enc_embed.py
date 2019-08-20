@@ -151,6 +151,9 @@ def infersent_flat_embed_posts(posts, embed_dim, data_fold_path):
 # print o1
 def sent_enc_featurize(sent_enc_feats_raw, model_type, data_dict, poss_sent_enc_feats_emb_dict, use_saved_sent_enc_feats, save_sent_enc_feats, data_fold_path, save_fold_path, test_mode):
 	max_num_sent_enc_feats = 3
+	if len(sent_enc_feats_raw) > max_num_sent_enc_feats:
+		print("too many sent enc features!")
+		exit()
 	max_num_attributes = 2
 	sent_enc_feats = []
 	var_model_hier = is_model_hier(model_type)
