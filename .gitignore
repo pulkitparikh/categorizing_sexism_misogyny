@@ -8,4 +8,5 @@ results/
 saved/
 *.pyc
 *pycache*
+extra_files/
 
