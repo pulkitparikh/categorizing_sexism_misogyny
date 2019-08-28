@@ -373,4 +373,6 @@ def get_model(m_type, word_cnt_post, sent_cnt, word_cnt_sent, word_feats, sen_en
 # import numpy as np
 # word_feats = {'emb': 'elmo', 's_enc': 'rnn', 'm_id': '11', 'dim_shape': (100,300)}, {'emb': 'glove', 's_enc': 'rnn', 'm_id': '21','dim_shape': [100,300]}
 # sen_enc_feats = [{'emb': 'use', 'm_id': '1', 'feats': np.zeros((100, 768))}]
-# get_model('hier_fuse', 200, 20, 100, word_feats, sen_enc_feats, 0.001, 0.1, 0.1, 80, 'lstm', 'binary_crossentropy', 'sigmoid', 14, 100, 200, 1, False, [2,3,4])
+# m, a = get_model('hier_fuse', 200, 20, 100, word_feats, sen_enc_feats, 0.001, 0.1, 0.1, 80, 'lstm', 'binary_crossentropy', 'sigmoid', 14, 100, 200, 1, False, [2,3,4])
+# m.summary()
+# a.summary()
