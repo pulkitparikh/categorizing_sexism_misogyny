@@ -88,7 +88,7 @@ def c_rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type, num
     conc_mat = concatenate(conv_l_list)
     return rnn_generic_embed(w_emb_input_seq, conc_mat, rnn_dim, att_dim, rnn_type)
 
-def rnn_generic_embed(w_emb_input_seq, seq_for_rnn, rnn_dim, att_dim, rnn_type):    
+def rnn_generic_embed(w_emb_input_seq, seq_for_rnn, rnn_dim, att_dim, rnn_type):
     if rnn_type == 'lstm':
         blstm_l = Bidirectional(LSTM(rnn_dim, return_sequences=(att_dim > 0)))(seq_for_rnn)
     elif rnn_type == 'gru':
@@ -363,10 +363,14 @@ def get_model(m_type, word_cnt_post, sent_cnt, word_cnt_sent, word_feats, sen_en
     return model, att_mod
 
 
-# import numpy as np
 # # # word_feats = {'glove': {'embed_mat': np.zeros((20000, 300)), 'tune': True, 's_enc': 'cnn_rnn_sep', 'emb_size': 300, 'm_id': '113'}, 'elmo': {'s_enc': 'rnn', 'emb_size': 3072, 'm_id': '32'}, 'ling': {'s_enc': 'cnn', 'emb_size': 33, 'm_id': '22'}}
 # # # sen_enc_feats = {'infersent': {'emb_size': 4096, 'm_id': '1'}, 'use': {'emb_size': 512, 'm_id': '3'}}
 
 # word_feats = {'elmo': {'s_enc': 'cnn', 'm_id': '11', 'dim_shape': [100,300]}}#, 'glove': {'s_enc': 'rnn', 'm_id': '22', 'dim_shape': [100,300]}}
 # sen_enc_feats = {}#'use': {'m_id': '3', 'feats': np.zeros((100, 512))}, 'bert': {'m_id': '1', 'feats': np.zeros((100, 768))}}
 # get_model('c_bilstm', 200, 20, 100, word_feats, sen_enc_feats, 0.001, 0.1, 0.1, 80, 'lstm', 'binary_crossentropy', 'sigmoid', 14, 200, 0, 1, False, [2,3,4])
+
+# import numpy as np
+# word_feats = {'emb': 'elmo', 's_enc': 'rnn', 'm_id': '11', 'dim_shape': (100,300)}, {'emb': 'glove', 's_enc': 'rnn', 'm_id': '21','dim_shape': [100,300]}
+# sen_enc_feats = [{'emb': 'use', 'm_id': '1', 'feats': np.zeros((100, 768))}]
+# get_model('hier_fuse', 200, 20, 100, word_feats, sen_enc_feats, 0.001, 0.1, 0.1, 80, 'lstm', 'binary_crossentropy', 'sigmoid', 14, 100, 200, 1, False, [2,3,4])
