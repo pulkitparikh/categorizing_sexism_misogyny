@@ -68,7 +68,7 @@ for conf_dict in conf_dict_list:
                                                                 mod_op_list_save_list.append(mod_op_list) 
                                                             pred_vals, true_vals, metr_dict = evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, thresh, conf_dict_com['gen_att'], conf_dict_com["output_folder_name"], ("%s~%d" % (fname_part,run_ind)))
                                                             if conf_dict_com['gen_inst_res'] and run_ind == 0:
-                                                                insights_results(pred_vals, true_vals, data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], data_dict['text_sen'][data_dict['test_st_ind']:data_dict['test_en_ind']], data_dict['lab'][0:data_dict['train_en_ind']], fname_part, conf_dict_com["output_folder_name"])
+                                                                insights_results(pred_vals, true_vals, data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], data_dict['text_sen'][data_dict['test_st_ind']:data_dict['test_en_ind']], fname_part, conf_dict_com["output_folder_name"])
                                                         f_res.write("%s\n\n" % info_str)
                                                         print("%s\n" % info_str)
                                                         metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"])

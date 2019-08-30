@@ -4,6 +4,7 @@ data/*.tsv
 data/*.zip
 data/*.sh
 data/word_sent_embed/
+data/ids_files/
 results/
 saved/
 *.pyc

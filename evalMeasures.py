@@ -71,7 +71,7 @@ def write_results(metr_dict, f_res):
 	f_res.write("Exact Match: %.3f\n" % metr_dict['avg_em'])
 	f_res.write("Inverse Hamming Loss: %.3f\n" % metr_dict['avg_ihl'])
 
-def insights_results(pred_vals, true_vals, posts, sen_posts, train_labels, dyn_fname_part, out_fold):
+def insights_results(pred_vals, true_vals, posts, sen_posts, dyn_fname_part, out_fold):
 	inst_fold_str = ("%sinst/" % (out_fold))
 	os.makedirs(inst_fold_str, exist_ok=True)
 	dyn_fname_inst = ("%s%s.txt" % (inst_fold_str, dyn_fname_part))
@@ -87,23 +87,26 @@ def insights_results(pred_vals, true_vals, posts, sen_posts, train_labels, dyn_f
 		f_err_inst.write("%s\t%d\t%d\t%.2f\t%s\t%s\t%.3f\n" % (post_reco, len(sen_post), num_words, num_words_sen, pr_str, ac_str, js))
 	f_err_inst.close()
 
-	# train_coverage = np.zeros(NUM_CLASSES)
-	# for lset in train_labels:
-	# 	for l in lset:
-	# 		train_coverage[l] += 1.0
-	# train_coverage /= float(len(train_labels))
+# insights_results_lab(pred_vals, true_vals, data_dict['lab'][0:data_dict['train_en_ind']], fname_part, conf_dict_com["output_folder_name"])
+def insights_results_lab(pred_vals, true_vals, train_labels, dyn_fname_part, out_fold):
+	TP, FP, FN = components_F(pred_vals, true_vals)
+	train_coverage = np.zeros(NUM_CLASSES)
+	for lset in train_labels:
+		for l in lset:
+			train_coverage[l] += 1.0
+	train_coverage /= float(len(train_labels))
 
-	# dyn_fname_lab = ("%slab/%s.txt" % (out_fold, dyn_fname_part))
-	# f_err_lab = open(dyn_fname_lab, 'w')
-	# f_err_lab.write("lab id\tlabel\ttrain cov\tPrec\tRecall\tF score\n")
-	# class_ind = 0
-	# for tp, fp, fn in zip(TP,FP,FN):
-	# 	P = prec_label(tp, fp)
-	# 	R = rec_label(tp, fn)
-	# 	F = f_label(tp, fp, fn)
-	# 	f_err_lab.write("%d\t%s\t%.2f\t%.3f\t%.3f\t%.3f\n" % (class_ind, FOR_LMAP[class_ind],train_coverage[class_ind]*100,P,R,F))
-	# 	class_ind += 1
-	# f_err_lab.close()
+	dyn_fname_lab = ("%slab/%s.txt" % (out_fold, dyn_fname_part))
+	f_err_lab = open(dyn_fname_lab, 'w')
+	f_err_lab.write("lab id\tlabel\ttrain cov\tPrec\tRecall\tF score\n")
+	class_ind = 0
+	for tp, fp, fn in zip(TP,FP,FN):
+		P = prec_label(tp, fp)
+		R = rec_label(tp, fn)
+		F = f_label(tp, fp, fn)
+		f_err_lab.write("%d\t%s\t%.2f\t%.3f\t%.3f\t%.3f\n" % (class_ind, FOR_LMAP[class_ind],train_coverage[class_ind]*100,P,R,F))
+		class_ind += 1
+	f_err_lab.close()
 
 def aggregate_metr(metr_dict, num_vals):
 	for key in ['em', 'ji', 'ihl', 'pi', 'ri', 'fi', 'pl_mi', 'rl_mi', 'fl_mi', 'pl_ma', 'rl_ma', 'fl_ma']:
