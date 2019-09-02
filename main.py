@@ -1,3 +1,5 @@
+# for all prob trans types including BR, loss functions, evaluation logic verified. gen_batch.. and other parts code too
+
 import os
 import time
 import sys

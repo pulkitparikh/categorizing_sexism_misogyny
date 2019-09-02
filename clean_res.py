@@ -111,10 +111,10 @@ def rem_dupli_text(f_name_1, f_name_2):
 	p_best_dict_2 = {}
 	p_remov_inds_2 = [False]*len(rows2_org)
 	for ind, row in enumerate(rows2_org):
-		post_cl = tuple(sorted(row.items(), key=lambda kv: kv[1]))
-		if post_cl in p_best_dict_2:
-			p_remov_inds_2[p_best_dict_2[post_cl]] = True
-		p_best_dict_2[post_cl] = ind
+		row_key = tuple(sorted(row.items(), key=lambda kv: kv[1]))
+		if row_key in p_best_dict_2:
+			p_remov_inds_2[p_best_dict_2[row_key]] = True
+		p_best_dict_2[row_key] = ind
 
 	with open(f_name_1,'r') as res_tsv:
 		reader = csv.DictReader(res_tsv, delimiter = '\t')
@@ -123,12 +123,12 @@ def rem_dupli_text(f_name_1, f_name_2):
 	p_best_dict_1 = {}
 	p_remov_inds_1 = [False]*len(rows1_org)
 	for ind, row in enumerate(rows1_org):
-		post_cl = tuple(sorted(row.items(), key=lambda kv: kv[1]))
-		if post_cl in p_best_dict_1:
-			p_remov_inds_1[p_best_dict_1[post_cl]] = True
-		if post_cl in p_best_dict_2:
-			p_remov_inds_2[p_best_dict_2[post_cl]] = True
-		p_best_dict_1[post_cl] = ind
+		row_key = tuple(sorted(row.items(), key=lambda kv: kv[1]))
+		if row_key in p_best_dict_1:
+			p_remov_inds_1[p_best_dict_1[row_key]] = True
+		if row_key in p_best_dict_2:
+			p_remov_inds_2[p_best_dict_2[row_key]] = True
+		p_best_dict_1[row_key] = ind
 
 	rows2 = []
 	for ind, row in enumerate(rows2_org):
@@ -263,20 +263,25 @@ mod_best_dic_test = {}
 # model_dic_sorted_test = {}
 for key, row in model_dic_test.items():
 	# model_dic_sorted_test[key] = sorted(row_list, key = lambda i: float(i['f_I+f_Ma']), reverse=True)
-	mod_best_dic_test[tuple(list(key)+[row['GPU']])] = float(row['f_I+f_Ma'])
+	# mod_best_dic_test[tuple(list(key)+[row['GPU']])] = float(row['f_I+f_Ma'])
+	mod_best_dic_test[key] = float(row['f_I+f_Ma'])
 
 mod_best_sorted_test = sorted(mod_best_dic_test.items(), key = lambda x : x[1], reverse=True)
-for x in mod_best_sorted_test:
-	print(x)
-print("-----------------------")
-for mod_key, val in mod_best_sorted_test:
-	row = model_dic_test[mod_key[:-1]]
-	if sorted(tuple(row.items())) not in rows_prev:
-		print(sorted(tuple(row.items())))
+# for x, v in mod_best_sorted_test:
+# 	t = (tuple(list(x) + [model_dic_test[x]['GPU']]), v)
+# 	print(t)
+# print("-----------------------")
+# for mod_key, val in mod_best_sorted_test:
+# 	# row = model_dic_test[mod_key[:-1]]
+# 	row = model_dic_test[mod_key]
+# 	if sorted(tuple(row.items())) not in rows_prev:
+# 		# print(sorted(tuple(row.items())))
+# 		print(tuple(row.items()))
 
 with open(test_res_file, 'w') as f_fin:
 	w_fin = csv.DictWriter(f_fin, fieldnames = my_fields, delimiter = '\t')
 	w_fin.writeheader()
 	for mod_key, val in mod_best_sorted_test:
 		# for row in model_dic_sorted_test[mod_key]:
-		w_fin.writerow(model_dic_test[mod_key[:-1]])
+		# w_fin.writerow(model_dic_test[mod_key[:-1]])
+		w_fin.writerow(model_dic_test[mod_key])
