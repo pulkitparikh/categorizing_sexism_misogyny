@@ -1,4 +1,4 @@
-# for all prob trans types including BR, loss functions, evaluation logic verified. gen_batch.. and other parts code too
+# for all prob trans types including BR, loss functions, evaluation logic verified. gen_batch.. and other parts too
 
 import os
 import time
