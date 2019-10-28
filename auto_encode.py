@@ -5,7 +5,7 @@ import re
 import numpy as np
 import json
 import h5py
-from sent_embed import use_embed_posts, bert_embed_posts, infersent_embed_posts
+from sent_enc_embed import use_embed_posts, bert_embed_posts, infersent_embed_posts
 from keras import optimizers
 from keras import backend as K
 from keras.layers import Dense, Input, Dropout
@@ -20,6 +20,7 @@ def shortlist_words(num_sample, filename, op_name, data_path):
 	post_list = []
 	w_c_list = []
 	for post_org in open(raw_fname):
+		# should remove this rstrip; not sure how it came up
 		post = post_org.rstrip()
 		l = len(post.split())
 		if l < 7:
