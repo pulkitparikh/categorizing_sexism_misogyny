@@ -1,7 +1,13 @@
 import os
 import numpy as np
-from loadPreProc import NUM_CLASSES, FOR_LMAP
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
+metrics = {
+	'multi-label': ['em', 'ji', 'ihl', 'pi', 'ri', 'fi', 'pl_mi', 'rl_mi', 'fl_mi', 'pl_ma', 'rl_ma', 'fl_ma'],
+	'multi-class': ['acc', 'p_mi', 'r_mi', 'f_mi', 'p_ma', 'r_ma', 'f_ma', 'p_we', 'r_we', 'f_we'],
+	'binary': ['acc', 'p', 'r', 'f'],
+}
+  
 def rec_label(tp, fn):
 	if (tp + fn) == 0:
 		# print "denominator zero"
@@ -20,7 +26,7 @@ def f_label(tp, fp, fn):
 		return -np.inf
 	return (2*tp)/float(2*tp + fn + fp)
 
-def components_F(pred, act):
+def components_F(pred, act, NUM_CLASSES):
 	TP = np.zeros(NUM_CLASSES)
 	FP = np.zeros(NUM_CLASSES)
 	# TN = np.zeros(NUM_CLASSES)
@@ -50,26 +56,11 @@ def set_diff(list1, list2):
     intersection = len(set(list1).intersection(list2))
     return (len(list1) + len(list2)) - (2*intersection)
 
-def hamming_loss(pred, act):
+def hamming_loss(pred, act, NUM_CLASSES):
 	cnt = 0.0
 	for pr, ac in zip(pred, act):
 		cnt += set_diff(pr, ac)
 	return cnt/(len(pred)*NUM_CLASSES)		
-
-def write_results(metr_dict, f_res):
-	print("f1 Instance: %.3f, std: %.3f" % (metr_dict['avg_fi'], metr_dict['std_fi']))
-	print("f1 Lable Macro: %.3f, std: %.3f" % (metr_dict['avg_fl_ma'], metr_dict['std_fl_ma']))
-	print("Jaccard Index: %.3f" % metr_dict['avg_ji'])
-	print("f1 Lable Micro: %.3f" % metr_dict['avg_fl_mi'])
-	print("Exact Match: %.3f" % metr_dict['avg_em'])
-	print("Inverse Hamming Loss: %.3f" % metr_dict['avg_ihl'])
-
-	f_res.write("f1 Instance: %.3f, std: %.3f\n" % (metr_dict['avg_fi'], metr_dict['std_fi']))
-	f_res.write("f1 Lable Macro: %.3f, std: %.3f\n" % (metr_dict['avg_fl_ma'], metr_dict['std_fl_ma']))
-	f_res.write("Jaccard Index: %.3f\n" % metr_dict['avg_ji'])
-	f_res.write("f1 Lable Micro: %.3f\n" % metr_dict['avg_fl_mi'])
-	f_res.write("Exact Match: %.3f\n" % metr_dict['avg_em'])
-	f_res.write("Inverse Hamming Loss: %.3f\n" % metr_dict['avg_ihl'])
 
 def insights_results(pred_vals, true_vals, posts, sen_posts, dyn_fname_part, out_fold):
 	inst_fold_str = ("%sinst/" % (out_fold))
@@ -88,8 +79,8 @@ def insights_results(pred_vals, true_vals, posts, sen_posts, dyn_fname_part, out
 	f_err_inst.close()
 
 # insights_results_lab(pred_vals, true_vals, data_dict['lab'][0:data_dict['train_en_ind']], fname_part, conf_dict_com["output_folder_name"])
-def insights_results_lab(pred_vals, true_vals, train_labels, dyn_fname_part, out_fold):
-	TP, FP, FN = components_F(pred_vals, true_vals)
+def insights_results_lab(pred_vals, true_vals, train_labels, dyn_fname_part, out_fold, NUM_CLASSES, FOR_LMAP):
+	TP, FP, FN = components_F(pred_vals, true_vals, NUM_CLASSES)
 	train_coverage = np.zeros(NUM_CLASSES)
 	for lset in train_labels:
 		for l in lset:
@@ -108,8 +99,9 @@ def insights_results_lab(pred_vals, true_vals, train_labels, dyn_fname_part, out
 		class_ind += 1
 	f_err_lab.close()
 
-def aggregate_metr(metr_dict, num_vals):
-	for key in ['em', 'ji', 'ihl', 'pi', 'ri', 'fi', 'pl_mi', 'rl_mi', 'fl_mi', 'pl_ma', 'rl_ma', 'fl_ma']:
+def aggregate_metr(metr_dict, num_vals, prob_type):
+	global metrics
+	for key in metrics[prob_type]:
 		s = 0
 		s_sq = 0
 		for v in metr_dict[key]:
@@ -121,30 +113,82 @@ def aggregate_metr(metr_dict, num_vals):
 		metr_dict[key] = []
 	return metr_dict
 
-def init_metr_dict():
+def init_metr_dict(prob_type):
+	global metrics
 	metr_dict = {}
-	for key in ['em', 'ji', 'ihl', 'pi', 'ri', 'fi', 'pl_mi', 'rl_mi', 'fl_mi', 'pl_ma', 'rl_ma', 'fl_ma']:
+	for key in metrics[prob_type]:
 		metr_dict[key] = []
 	return metr_dict
 
-def calc_metrics_print(pred_vals, true_vals, metr_dict):
-	metr_dict['em'].append(exact_match(pred_vals, true_vals))
-	metr_dict['ji'].append(jaccard_index_avg(pred_vals, true_vals))
-	metr_dict['ihl'].append(inverse_hamming_loss(pred_vals, true_vals))
-	pi, ri, fi = F_metrics_instance(pred_vals, true_vals)
-	metr_dict['pi'].append(pi)
-	metr_dict['ri'].append(ri)
-	metr_dict['fi'].append(fi)
-	TP, FP, FN = components_F(pred_vals, true_vals)
-	pl_mi, rl_mi, fl_mi = F_metrics_label_micro_from_comp(TP, FP, FN)
-	metr_dict['pl_mi'].append(pl_mi)
-	metr_dict['rl_mi'].append(rl_mi)
-	metr_dict['fl_mi'].append(fl_mi)
-	pl_ma, rl_ma, fl_ma = F_metrics_label_macro_from_comp(TP, FP, FN)
-	metr_dict['pl_ma'].append(pl_ma)
-	metr_dict['rl_ma'].append(rl_ma)
-	metr_dict['fl_ma'].append(fl_ma)
-	
+def write_results(metr_dict, f_res, f_tsv, prob_type, model_type,word_feat_str,sent_enc_feat_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,rnn_type,conf_dict_com):
+	if prob_type == 'multi-label':
+		lines = [
+			"f1 Instance: %.3f, std: %.3f" % (metr_dict['avg_fi'], metr_dict['std_fi']),
+			"f1 Lable Macro: %.3f, std: %.3f" % (metr_dict['avg_fl_ma'], metr_dict['std_fl_ma']),
+			"Jaccard Index: %.3f" % metr_dict['avg_ji'],
+			"f1 Lable Micro: %.3f" % metr_dict['avg_fl_mi'],
+			"Exact Match: %.3f" % metr_dict['avg_em'],
+			"Inverse Hamming Loss: %.3f" % metr_dict['avg_ihl']
+		]
+		f_tsv.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (model_type,word_feat_str,sent_enc_feat_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,(metr_dict['avg_fl_ma']+metr_dict['avg_fi'])/2,(metr_dict['std_fl_ma']+metr_dict['std_fi'])/2,metr_dict['avg_fi'],metr_dict['avg_fl_ma'],(metr_dict['avg_fl_ma']+metr_dict['avg_fi']+metr_dict['avg_ji']+metr_dict['avg_fl_mi'])/4,metr_dict['avg_ji'],metr_dict['avg_fl_mi'],metr_dict['avg_em'],metr_dict['avg_ihl'],rnn_type,conf_dict_com["LEARN_RATE"],conf_dict_com["BATCH_SIZE"],conf_dict_com["dropO1"],conf_dict_com["dropO2"], conf_dict_com["test_mode"]))
+	elif prob_type == 'multi-class':
+		lines = [
+			"f1 Weighted: %.3f, std: %.3f" % (metr_dict['avg_f_we'], metr_dict['std_f_we']),
+			"f1 Macro: %.3f" % metr_dict['avg_f_ma'],
+			"f1 Micro: %.3f" % metr_dict['avg_f_mi'],
+			"P Weighted: %.3f" % metr_dict['avg_p_we'],
+			"R Weighted: %.3f" % metr_dict['avg_r_we'],
+			"Accuracy: %.3f" % metr_dict['avg_acc'],
+		]
+		f_tsv.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (model_type,word_feat_str,sent_enc_feat_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,metr_dict['avg_f_we'],metr_dict['avg_f_ma'],metr_dict['avg_f_mi'],metr_dict['avg_acc'],metr_dict['avg_p_we'],metr_dict['avg_p_ma'],metr_dict['avg_p_mi'],metr_dict['avg_r_we'],metr_dict['avg_r_ma'],metr_dict['avg_r_mi'],metr_dict['std_f_we'],rnn_type,conf_dict_com["LEARN_RATE"],conf_dict_com["BATCH_SIZE"],conf_dict_com["dropO1"],conf_dict_com["dropO2"], conf_dict_com["test_mode"]))
+	elif prob_type == 'binary':
+		lines = [
+			"f1: %.3f, std: %.3f" % (metr_dict['avg_f'], metr_dict['std_f']),
+			"P: %.3f" % metr_dict['avg_p'],
+			"R: %.3f" % metr_dict['avg_r'],
+			"Accuracy: %.3f" % metr_dict['avg_acc'],
+		]
+		f_tsv.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (model_type,word_feat_str,sent_enc_feat_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,metr_dict['avg_f'],metr_dict['avg_p'],metr_dict['avg_r'],metr_dict['avg_acc'],metr_dict['std_f'],rnn_type,conf_dict_com["LEARN_RATE"],conf_dict_com["BATCH_SIZE"],conf_dict_com["dropO1"],conf_dict_com["dropO2"], conf_dict_com["test_mode"]))
+	for line in lines:
+		print(line)
+		f_res.write(line + '\n')
+
+def calc_metrics_print(pred_vals, true_vals, metr_dict, NUM_CLASSES, prob_type):
+	if prob_type == 'multi-label':
+		metr_dict['em'].append(exact_match(pred_vals, true_vals))
+		metr_dict['ji'].append(jaccard_index_avg(pred_vals, true_vals))
+		metr_dict['ihl'].append(inverse_hamming_loss(pred_vals, true_vals, NUM_CLASSES))
+		pi, ri, fi = F_metrics_instance(pred_vals, true_vals)
+		metr_dict['pi'].append(pi)
+		metr_dict['ri'].append(ri)
+		metr_dict['fi'].append(fi)
+		TP, FP, FN = components_F(pred_vals, true_vals, NUM_CLASSES)
+		pl_mi, rl_mi, fl_mi = F_metrics_label_micro_from_comp(TP, FP, FN)
+		metr_dict['pl_mi'].append(pl_mi)
+		metr_dict['rl_mi'].append(rl_mi)
+		metr_dict['fl_mi'].append(fl_mi)
+		pl_ma, rl_ma, fl_ma = F_metrics_label_macro_from_comp(TP, FP, FN, NUM_CLASSES)
+		metr_dict['pl_ma'].append(pl_ma)
+		metr_dict['rl_ma'].append(rl_ma)
+		metr_dict['fl_ma'].append(fl_ma)
+	elif prob_type == 'multi-class':
+		pred_vals_sc = [labels[0] for labels in pred_vals]
+		true_vals_sc = [labels[0] for labels in true_vals]
+		metr_dict['p_mi'].append(precision_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='micro'))
+		metr_dict['r_mi'].append(recall_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='micro'))
+		metr_dict['f_mi'].append(f1_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='micro'))
+		metr_dict['p_ma'].append(precision_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='macro'))
+		metr_dict['r_ma'].append(recall_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='macro'))
+		metr_dict['f_ma'].append(f1_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='macro'))
+		metr_dict['p_we'].append(precision_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='weighted'))
+		metr_dict['r_we'].append(recall_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='weighted'))
+		metr_dict['f_we'].append(f1_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='weighted'))
+		metr_dict['acc'].append(accuracy_score(true_vals_sc, pred_vals_sc))
+	elif prob_type == 'binary':
+		metr_dict['p'].append(precision_score(true_vals, pred_vals))
+		metr_dict['r'].append(recall_score(true_vals, pred_vals))
+		metr_dict['f'].append(f1_score(true_vals, pred_vals))
+		metr_dict['acc'].append(accuracy_score(true_vals, pred_vals))
 	return metr_dict
 
 # actual metric-related functions ------------------------------------
@@ -162,12 +206,12 @@ def jaccard_index_avg(pred, act):
 		cnt += jaccard_similarity(pr, ac)
 	return cnt/len(pred)		
 
-def inverse_hamming_loss(pred, act):
+def inverse_hamming_loss(pred, act, NUM_CLASSES):
 	cnt = 0.0
 	for pr, ac in zip(pred, act):
 		cnt += set_diff(pr, ac)
 	# print ((len(pred)*NUM_CLASSES)-cnt)/(len(pred)*NUM_CLASSES)		
-	# print 1-hamming_loss(pred, act)
+	# print 1-hamming_loss(pred, act, NUM_CLASSES)
 	return ((len(pred)*NUM_CLASSES)-cnt)/(len(pred)*NUM_CLASSES)
 
 def F_metrics_instance(pred, act):
@@ -185,11 +229,11 @@ def F_metrics_instance(pred, act):
 		f_sc = 2*prec*rec/(prec+rec) 
 	return prec, rec, f_sc	
 
-def F_metrics_label_macro(pred, act):
-	TP, FP, FN = components_F(pred, act)
-	return F_metrics_label_macro_from_comp(TP, FP, FN)
+def F_metrics_label_macro(pred, act, NUM_CLASSES):
+	TP, FP, FN = components_F(pred, act, NUM_CLASSES)
+	return F_metrics_label_macro_from_comp(TP, FP, FN, NUM_CLASSES)
 
-def F_metrics_label_macro_from_comp(TP, FP, FN):
+def F_metrics_label_macro_from_comp(TP, FP, FN, NUM_CLASSES):
 	# print TP
 	# print FP
 	# print FN
@@ -206,8 +250,8 @@ def F_metrics_label_macro_from_comp(TP, FP, FN):
 	# recs = [rec_label(tp, fn) for tp, fn in zip(TP,FN)]
 	return avgP/NUM_CLASSES, avgR/NUM_CLASSES, avgF/NUM_CLASSES
 
-def F_metrics_label_micro(pred, act):
-	TP, FP, FN = components_F(pred, act)
+def F_metrics_label_micro(pred, act, NUM_CLASSES):
+	TP, FP, FN = components_F(pred, act, NUM_CLASSES)
 	return F_metrics_label_micro_from_comp(TP, FP, FN)
 
 def F_metrics_label_micro_from_comp(TP, FP, FN):

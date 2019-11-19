@@ -5,66 +5,86 @@ only_inc_best_list = [
 ]
 #('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11', '', 'di', 'True'), ('hier_fuse', 'elm_cnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_rnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_cnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_rnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_cnn_11', '', 'di', 'True'), ('uni_sent', '', 'bert_pre_1', 'di', 'True'), ('uni_sent', '', 'bert_1', 'di', 'True'), ('uni_sent', '', 'use_1', 'di', 'True'), ('uni_sent', '', 'infersent_1', 'di', 'True')]
 remove_list = [
-	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~comb_cnn_rnn~1~~glove~comb_cnn_rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~comb_cnn_rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'use~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'use~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~use~1~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'use~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', False),
+	# ('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~ling~rnn~1~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~c_rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
+	# ('flat_fuse', 'elmo~c_rnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', False),
+	]
+useless_list = []
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~comb_cnn_rnn~1~~glove~comb_cnn_rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~comb_cnn_rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
 
-	('hier_fuse', 'elmo~c_rnn~11~~glove~c_rnn~21~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2+use_3', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_pre_3', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2+use_2', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_2', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~c_rnn~11~~glove~c_rnn~21~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2+use_3', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_pre_3', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2+use_2', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_2', 'di', 'True', True),
 
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21+lin_rnn_31', 'bert_pre_1', 'di', 'True', True),
-	('hier_fuse', 'elm_sep_111+glo_sep_211', 'bert_pre_1', 'di', 'True', True),
-	('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21+lin_rnn_31', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_sep_111+glo_sep_211', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11', 'bert_pre_1', 'di', 'True', True),
 
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.9_0.8_0.7_0.6_0.5_mse_0.25_0.25_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.9_0.8_0.7_mse_0.25_0.25_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.95_0.9_0.85_mse_0.25_0.25_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.95_0.9_0.85_0.8_0.75_mse_0.25_0.25_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.9_0.8_0.7_0.6_0.5_mse_0.25_0.25_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.9_0.8_0.7_mse_0.25_0.25_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.95_0.9_0.85_mse_0.25_0.25_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.95_0.9_0.85_0.8_0.75_mse_0.25_0.25_1', 'di', 'True', True),
 
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'lp', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'lp', 'False', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'dc', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'lp', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'lp', 'False', True),
+	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'dc', 'True', True),
 
-	('hier_fuse', 'elm_rnn_11', '', 'dc', 'True', True),
-	('flat_fuse', 'elm_rnn_1', '', 'dc', 'True', True),
-	('flat_fuse', 'elm_rnn_1', '', 'lp', 'False', True),
-	('flat_fuse', 'elm_rnn_1', '', 'lp', 'True', True),
-	('hier_fuse', 'elm_rnn_11', '', 'lp', 'False', True),
-	('hier_fuse', 'elm_rnn_11', '', 'lp', 'True', True),
-	('flat_fuse', 'elm_cnn_1', '', 'di', 'True', True),
-	('flat_fuse', 'elm_rnn_1', '', 'di', 'True', True),
-	('flat_fuse', 'elm_rnn_1', '', 'di', 'True', False),
+	# ('hier_fuse', 'elm_rnn_11', '', 'dc', 'True', True),
+	# ('flat_fuse', 'elm_rnn_1', '', 'dc', 'True', True),
+	# ('flat_fuse', 'elm_rnn_1', '', 'lp', 'False', True),
+	# ('flat_fuse', 'elm_rnn_1', '', 'lp', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11', '', 'lp', 'False', True),
+	# ('hier_fuse', 'elm_rnn_11', '', 'lp', 'True', True),
+	# ('flat_fuse', 'elm_cnn_1', '', 'di', 'True', True),
+	# ('flat_fuse', 'elm_rnn_1', '', 'di', 'True', True),
+	# ('flat_fuse', 'elm_rnn_1', '', 'di', 'True', False),
 
-	('flat_fuse', 'glo_rnn_1', '', 'di', 'True', True),
-	('flat_fuse', 'fas_rnn_1', '', 'di', 'True', True),
+	# ('flat_fuse', 'glo_rnn_1', '', 'di', 'True', True),
+	# ('flat_fuse', 'fas_rnn_1', '', 'di', 'True', True),
 
-	('c_bilstm', 'elm_rnn_1', '', 'di', 'True', False),
+	# ('c_bilstm', 'elm_rnn_1', '', 'di', 'True', False),
 
-	('uni_sent', '', 'bert_pre_1', 'di', 'True', True),
-	('uni_sent', '', 'bert_1', 'di', 'True', True),
-	('uni_sent', '', 'use_1', 'di', 'True', True),
-	('uni_sent', '', 'infersent_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11', '', 'di', 'True', True),
-	('hier_fuse', 'glo_rnn_11', '', 'di', 'True', True),
-	('hier_fuse', 'fas_rnn_11', '', 'di', 'True', True),
-	('hier_fuse', 'elm_cnn_11', '', 'di', 'True', True),
-	('hier_fuse', 'glo_cnn_11', '', 'di', 'True', True),
-	('hier_fuse', 'fas_cnn_11', '', 'di', 'True', True)]
+	# ('uni_sent', '', 'bert_pre_1', 'di', 'True', True),
+	# ('uni_sent', '', 'bert_1', 'di', 'True', True),
+	# ('uni_sent', '', 'use_1', 'di', 'True', True),
+	# ('uni_sent', '', 'infersent_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11', '', 'di', 'True', True),
+	# ('hier_fuse', 'glo_rnn_11', '', 'di', 'True', True),
+	# ('hier_fuse', 'fas_rnn_11', '', 'di', 'True', True),
+	# ('hier_fuse', 'elm_cnn_11', '', 'di', 'True', True),
+	# ('hier_fuse', 'glo_cnn_11', '', 'di', 'True', True),
+	# ('hier_fuse', 'fas_cnn_11', '', 'di', 'True', True)]
 
 	# ('hier_fuse', 'elm_sep_111+glo_sep_111', 'bert_pre_1', 'di', 'True'),
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_pre_3', 'di', 'True'),
@@ -79,37 +99,53 @@ remove_list = [
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'),
 	# ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'),
 	# ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'),
-useless_list = [
-	# ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_2', 'di', 'True', True),
-	('hier_fuse', 'elm_cnn_11', '', 'lp', 'False', True),
-	('hier_fuse', 'elm_cnn_11', '', 'dc', 'True', True),
-	# ('hier_fuse', 'elm_rnn_11', '', 'lp', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_2', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_2', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_3', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'use_3', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_1+use_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'use_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_1+use_1', 'di', 'True', True),
-	('hier_fuse', 'elm_rnn_11+glo_rnn_21+fas_rnn_31+lin_rnn_41', 'bert_1', 'di', 'True', True),
-	('hier_fuse', 'elm_sep_111+glo_sep_211', 'bert_1', 'di', 'True', True),
-	('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_1', 'di', 'True', True)]
-input_res_file_1 = 'results/tsv1.txt'
-input_res_file_2 = 'results/tsv2.txt'
-val_res_file = 'results/val_tsv.txt'
-test_res_file = 'results/test_tsv.txt'
+# useless_list = [
+# 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_2', 'di', 'True', True),
+# 	('hier_fuse', 'elm_cnn_11', '', 'lp', 'False', True),
+# 	('hier_fuse', 'elm_cnn_11', '', 'dc', 'True', True),
+# 	# ('hier_fuse', 'elm_rnn_11', '', 'lp', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_2', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_2', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'bert_3', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_22', 'use_3', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_1+use_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'use_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_1+use_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_rnn_11+glo_rnn_21+fas_rnn_31+lin_rnn_41', 'bert_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_sep_111+glo_sep_211', 'bert_1', 'di', 'True', True),
+# 	('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_1', 'di', 'True', True)]
+# input_res_file_1 = 'results/tsv1.txt'
+# input_res_file_2 = 'results/tsv2.txt'
+# output_fold = 'results/'
+# best_metr = 'f_I+f_Ma'
+
+# input_res_file_1 = 'results_mis/tsv1.txt'
+# input_res_file_2 = ''
+# output_fold = 'results_mis/'
+# best_metr = 'f-We'
+
+input_res_file_1 = 'results_det/tsv1.txt'
+input_res_file_2 = ''
+output_fold = 'results_det/'
+best_metr = 'f'
+
 remove_list.extend(useless_list)
 # remove_list = []
 
+val_res_file = output_fold + 'val_tsv.txt'
+test_res_file = output_fold + 'test_tsv.txt'
 def rem_dupli_text(f_name_1, f_name_2):
-	with open(f_name_2,'r') as res_tsv:
-		reader = csv.DictReader(res_tsv, delimiter = '\t')
-		rows2_org = list(reader)
+	if f_name_2 == '':
+		rows2_org = []
+	else:
+		with open(f_name_2,'r') as res_tsv:
+			reader = csv.DictReader(res_tsv, delimiter = '\t')
+			rows2_org = list(reader)
+		p_remov_inds_2 = [False]*len(rows2_org)
 
 	p_best_dict_2 = {}
-	p_remov_inds_2 = [False]*len(rows2_org)
 	for ind, row in enumerate(rows2_org):
 		row_key = tuple(sorted(row.items(), key=lambda kv: kv[1]))
 		if row_key in p_best_dict_2:
@@ -212,8 +248,8 @@ for row in rows:
 mod_best_dic = {}
 model_dic_sorted = {}
 for key, row_list in model_dic.items():
-	model_dic_sorted[key] = sorted(row_list, key = lambda i: float(i['f_I+f_Ma']), reverse=True)
-	mod_best_dic[key] = float(model_dic_sorted[key][0]['f_I+f_Ma'])
+	model_dic_sorted[key] = sorted(row_list, key = lambda i: float(i[best_metr]), reverse=True)
+	mod_best_dic[key] = float(model_dic_sorted[key][0][best_metr])
 
 # print(model_dic.keys())
 # print("---------------")
@@ -262,9 +298,9 @@ except:
 mod_best_dic_test = {}
 # model_dic_sorted_test = {}
 for key, row in model_dic_test.items():
-	# model_dic_sorted_test[key] = sorted(row_list, key = lambda i: float(i['f_I+f_Ma']), reverse=True)
-	# mod_best_dic_test[tuple(list(key)+[row['GPU']])] = float(row['f_I+f_Ma'])
-	mod_best_dic_test[key] = float(row['f_I+f_Ma'])
+	# model_dic_sorted_test[key] = sorted(row_list, key = lambda i: float(i[best_metr]), reverse=True)
+	# mod_best_dic_test[tuple(list(key)+[row['GPU']])] = float(row[best_metr])
+	mod_best_dic_test[key] = float(row[best_metr])
 
 mod_best_sorted_test = sorted(mod_best_dic_test.items(), key = lambda x : x[1], reverse=True)
 # for x, v in mod_best_sorted_test:

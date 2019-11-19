@@ -3,8 +3,8 @@ import operator
 import re
 import random
 
-filename = "data/data.csv"
-opfilename = "data/smalljson.csv"
+filename = "data/ami_data.txt"
+opfilename = "data/small_ami.txt"
 sampleSize = 10
 
 with open(filename) as csvfile:

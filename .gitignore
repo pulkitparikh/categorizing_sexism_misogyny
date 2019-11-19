@@ -7,7 +7,9 @@ data/*.sh
 data/word_sent_embed/
 data/ids_files/
 results/
+results_mis/
 saved/
+saved_mis/
 *.pyc
 *pycache*
 extra_files/

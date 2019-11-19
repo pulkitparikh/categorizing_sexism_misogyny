@@ -18,6 +18,7 @@ set_session(tf.Session(config=config))
 
 os.makedirs(conf_dict_com["output_folder_name"], exist_ok=True)
 os.makedirs(conf_dict_com["save_folder_name"], exist_ok=True)
+data_dict = load_data(conf_dict_com["filename"], conf_dict_com["data_folder_name"], conf_dict_com["save_folder_name"], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com["test_mode"], conf_dict_com["filename_map"])
 res_path = conf_dict_com["output_folder_name"] + conf_dict_com["res_filename"]
 if os.path.isfile(res_path):
     f_res = open(res_path, 'a')
@@ -29,15 +30,19 @@ if os.path.isfile(tsv_path):
     f_tsv = open(tsv_path, 'a')
 else:
     f_tsv = open(tsv_path, 'w')
-    f_tsv.write("model\tword feats\tsent feats\ttrans\tclass imb\tcnn fils\tcnn kernerls\tthresh\trnn dim\tatt dim\tpool k\tstack RNN\tf_I+f_Ma\tstd_d\tf1-Inst\tf1-Macro\tsum_4\tJaccard\tf1-Micro\tExact\tI-Ham\trnn type\tl rate\tb size\tdr1\tdr2\ttest mode\n") 
+    if data_dict['prob_type'] == 'multi-label':
+        f_tsv.write("model\tword feats\tsent feats\ttrans\tclass imb\tcnn fils\tcnn kernerls\tthresh\trnn dim\tatt dim\tpool k\tstack RNN\tf_I+f_Ma\tstd_d\tf1-Inst\tf1-Macro\tsum_4\tJaccard\tf1-Micro\tExact\tI-Ham\trnn type\tl rate\tb size\tdr1\tdr2\ttest mode\n") 
+    elif data_dict['prob_type'] == 'multi-class':
+        f_tsv.write("model\tword feats\tsent feats\ttrans\tclass imb\tcnn fils\tcnn kernerls\tthresh\trnn dim\tatt dim\tpool k\tstack RNN\tf-We\tf-Ma\tf-Mi\tacc\tp-We\tp_Ma\tp_Mi\tr_We\tr_Ma\tr_Mi\tstd_f_we\trnn type\tl rate\tb size\tdr1\tdr2\ttest mode\n") 
+    elif data_dict['prob_type'] == 'binary':
+        f_tsv.write("model\tword feats\tsent feats\ttrans\tclass imb\tcnn fils\tcnn kernerls\tthresh\trnn dim\tatt dim\tpool k\tstack RNN\tf\tp\tr\tacc\tstd_f\trnn type\tl rate\tb size\tdr1\tdr2\ttest mode\n") 
 
-data_dict = load_data(conf_dict_com["filename"], conf_dict_com["data_folder_name"], conf_dict_com["save_folder_name"], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com["test_mode"])
 print("max # sentences: %d, max # words per sentence: %d, max # words per post: %d" % (data_dict['max_num_sent'], data_dict['max_words_sent'], data_dict['max_post_length']))
 
-metr_dict = init_metr_dict()
+metr_dict = init_metr_dict(data_dict['prob_type'])
 for conf_dict in conf_dict_list:
     for prob_trans_type in conf_dict["prob_trans_types"]:
-        trainY_list, trainY_noncat_list, num_classes_var, bac_map = transform_labels(data_dict['lab'][:data_dict['train_en_ind']], prob_trans_type, conf_dict_com['test_mode'], conf_dict_com["save_folder_name"])
+        trainY_list, trainY_noncat_list, num_classes_var, bac_map = transform_labels(data_dict['lab'][:data_dict['train_en_ind']], prob_trans_type, conf_dict_com['test_mode'], conf_dict_com["save_folder_name"], data_dict['NUM_CLASSES'], data_dict['prob_type'])
         for class_imb_flag in conf_dict["class_imb_flags"]:
             loss_func_list, nonlin, out_vec_size, cw_list = class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, prob_trans_type, conf_dict_com['test_mode'], conf_dict_com["save_folder_name"])
             for model_type in conf_dict["model_types"]:
@@ -73,9 +78,8 @@ for conf_dict in conf_dict_list:
                                                                 insights_results(pred_vals, true_vals, data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], data_dict['text_sen'][data_dict['test_st_ind']:data_dict['test_en_ind']], fname_part, conf_dict_com["output_folder_name"])
                                                         f_res.write("%s\n\n" % info_str)
                                                         print("%s\n" % info_str)
-                                                        metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"])
-                                                        f_tsv.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (model_type,word_feat_str,sent_enc_feat_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,(metr_dict['avg_fl_ma']+metr_dict['avg_fi'])/2,(metr_dict['std_fl_ma']+metr_dict['std_fi'])/2,metr_dict['avg_fi'],metr_dict['avg_fl_ma'],(metr_dict['avg_fl_ma']+metr_dict['avg_fi']+metr_dict['avg_ji']+metr_dict['avg_fl_mi'])/4,metr_dict['avg_ji'],metr_dict['avg_fl_mi'],metr_dict['avg_em'],metr_dict['avg_ihl'],rnn_type,conf_dict_com["LEARN_RATE"],conf_dict_com["BATCH_SIZE"],conf_dict_com["dropO1"],conf_dict_com["dropO2"], conf_dict_com["test_mode"]))
-                                                        write_results(metr_dict, f_res)                                                            
+                                                        metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
+                                                        write_results(metr_dict, f_res, f_tsv, data_dict['prob_type'], model_type,word_feat_str,sent_enc_feat_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,rnn_type,conf_dict_com)
                                                         timeLapsed = int(time.time() - startTime + 0.5)
                                                         hrs = timeLapsed/3600.
                                                         t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))

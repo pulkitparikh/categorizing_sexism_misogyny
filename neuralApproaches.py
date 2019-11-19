@@ -40,31 +40,36 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
         elif prob_trans_type == "br":
             mod_op = np.squeeze(mod_op, -1)
             y_pred = np.rint(mod_op).astype(int)
-            sum_br_lists += y_pred
-            for i in range(num_test_samp):
-                if mod_op[i] > max_br_lists[i]:
-                    max_br_lists[i] = mod_op[i]
-                    arg_max_br_lists[i] = cl_ind
+            if data_dict['prob_type'] == 'multi-label':
+                sum_br_lists += y_pred
+                for i in range(num_test_samp):
+                    if mod_op[i] > max_br_lists[i]:
+                        max_br_lists[i] = mod_op[i]
+                        arg_max_br_lists[i] = cl_ind
         y_pred_list.append(y_pred)
 
     if prob_trans_type == 'lp':
-        pred_vals = powerset_vec_to_label_lists(y_pred_list[0], bac_map)
+        pred_vals = powerset_vec_to_label_lists(y_pred_list[0], bac_map, data_dict['NUM_CLASSES'])
     elif prob_trans_type == "di" or prob_trans_type == "dc":        
         pred_vals = di_op_to_label_lists(y_pred_list[0])
     elif prob_trans_type == "br":
-        for i in range(len(true_vals)):
-            if sum_br_lists[i] == 0:
-                y_pred_list[arg_max_br_lists[i]][i] = 1
-        pred_vals = br_op_to_label_lists(y_pred_list)
+        if data_dict['prob_type'] == 'multi-label':
+            for i in range(len(true_vals)):
+                if sum_br_lists[i] == 0:
+                    y_pred_list[arg_max_br_lists[i]][i] = 1
+            pred_vals = br_op_to_label_lists(y_pred_list)
+        elif data_dict['prob_type'] == 'binary':
+            pred_vals = y_pred_list[0]
   
     if att_flag and (mod_op_list[0][1] is not None):
-        true_vals_multi_hot = trans_labels_multi_hot(true_vals)
+        true_vals_multi_hot = trans_labels_multi_hot(true_vals, data_dict['NUM_CLASSES'])
+        pred_vals_multi_hot = trans_labels_multi_hot(pred_vals, data_dict['NUM_CLASSES'])
         for ind, data_ind in enumerate(range(data_dict['test_st_ind'], data_dict['test_en_ind'])):
         # for ind, post in enumerate(data_dict['text_sen'][data_dict['test_st_ind']:data_dict['test_en_ind']]):
             att_path = "%satt_info/%s/" % (output_folder_name, fname_part_r_ind)
             os.makedirs(att_path, exist_ok=True)
             true_vals_multi_hot_ind = true_vals_multi_hot[ind].tolist()
-            y_pred_list_0_ind = y_pred_list[0][ind].tolist()
+            y_pred_list_0_ind = pred_vals_multi_hot[ind].tolist()
             mod_op_list_0_0_ind = mod_op_list[0][0][ind].tolist()
             post_sens = data_dict['text_sen'][data_ind][:data_dict['max_num_sent']]
             post_sens_split = []
@@ -101,7 +106,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
                 with open(fname_att, 'w') as f:
                     json.dump(att_list, f)
 
-    return pred_vals, true_vals, calc_metrics_print(pred_vals, true_vals, metr_dict)
+    return pred_vals, true_vals, calc_metrics_print(pred_vals, true_vals, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
 
 def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num_cnn_filters, rnn_type, fname_part, loss_func, class_w, nonlin, out_vec_size, rnn_dim, att_dim, max_pool_k_val, stack_rnn_flag, cnn_kernel_set, m_ind, run_ind, save_folder_name, use_saved_model, gen_att, learn_rate, dropO1, dropO2, batch_size, num_epochs, save_model):
     att_op = None
@@ -207,7 +212,7 @@ def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, p
 
     return loss_func_list, nonlin, out_vec_size, cw_list
 
-def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path):
+def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path, NUM_CLASSES, data_prob_type):
     filename = "%slabel_info~%s~%s.pickle" % (save_fold_path, prob_trans_type, test_mode)
     if os.path.isfile(filename):
         print("loading label info for %s; test mode = %s" % (prob_trans_type, test_mode))
@@ -215,18 +220,21 @@ def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path):
             trainY_list, trainY_noncat_list, num_classes_var, bac_map = pickle.load(f)
     else:
         if prob_trans_type == "lp":        
-            lp_trainY, num_classes_var, bac_map, for_map = fit_trans_labels_powerset(data_trainY)
+            lp_trainY, num_classes_var, bac_map, for_map = fit_trans_labels_powerset(data_trainY, NUM_CLASSES)
             print("num of LP classes: ", num_classes_var)
             trainY_noncat_list = [lp_trainY]
             trainY_list = [to_categorical(lp_trainY, num_classes=num_classes_var)]
         elif prob_trans_type == "di" or prob_trans_type == "dc":
             num_classes_var = NUM_CLASSES
-            trainY_list = [trans_labels_multi_hot(data_trainY)]
+            trainY_list = [trans_labels_multi_hot(data_trainY, NUM_CLASSES)]
             print("num of direct classes: ", num_classes_var)
             bac_map = None
             trainY_noncat_list = list(trainY_list)
-        elif prob_trans_type == "br":    
-            trainY_list = trans_labels_BR(data_trainY)
+        elif prob_trans_type == "br":
+            if data_prob_type == 'multi-label':
+                trainY_list = trans_labels_BR(data_trainY, NUM_CLASSES)
+            elif data_prob_type == 'binary':
+                trainY_list = trans_labels_bin_classi(data_trainY)
             num_classes_var = 2
             bac_map = None
             trainY_noncat_list = list(trainY_list)
