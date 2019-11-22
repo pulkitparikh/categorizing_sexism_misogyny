@@ -38,30 +38,16 @@ def get_embeddings_dict(vector_type, emb_dim):
     
     return embed
 
-def classification_model(X_train, X_test, y_train, y_tested, model_type,bac_map):
+def classification_model(X_train, X_test, y_train, y_tested, model_type):
     print ("Model Type:", model_type)
 
     model = get_model(model_type)
     model.fit(X_train,y_train)
     y_pred = model.predict(X_test)
-    y_predict = powerset_vec_to_label_lists(y_pred,bac_map)
-
-    EM = exact_match(y_predict,y_tested)
-    JC = jaccard_index_avg(y_predict,y_tested)
-    IHL = inverse_hamming_loss(y_predict,y_tested)
-    FI = F_metrics_instance(y_predict,y_tested)
-    Fmicro = F_metrics_label_micro(y_predict,y_tested)
-    Fmacro = F_metrics_label_macro(y_predict,y_tested)
-    
-    print ("exact match", EM)
-    print ("jaccard", JC)
-    print ("IHL", IHL)
-    print ("F_mtrics_instance",   FI[2])
-    print ("F_metrics_label_micro", Fmicro[2])
-    print ("F_metrics_label_macro", Fmacro[2])
-
+    return y_pred, y_tested
+	    
 def get_model(m_type):
-    if m_type == 'logistic regression':
+    if m_type == 'logistic_regression':
         logreg = LogisticRegression()
     elif m_type == "random_forest":
         logreg = RandomForestClassifier(n_estimators=conf_dict_com['n_estimators'], n_jobs=-1, class_weight=conf_dict_com['class_weight'])
@@ -110,7 +96,7 @@ def get_features(Tdata,emb,emb_size):
             features.append(concat)
     return features
 
-def train(data_dict, labels, MODEL_TYPE,feat_type, bac_map,n_class,conf_dict_com):
+def train(data_dict,conf_dict_com):
 
     print (conf_dict_com['feat_type'])
     if conf_dict_com['feat_type']== "wordngrams":
@@ -193,22 +179,70 @@ def train(data_dict, labels, MODEL_TYPE,feat_type, bac_map,n_class,conf_dict_com
         test_features = feat_conact(test_features_word,test_features_char,test_features_POS,doc_feat_test,len_post_test,adj_test,data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']])
         print (np.shape(train_features))
         print (np.shape(test_features))
-    if(MODEL_TYPE != "all"):
-        print (MODEL_TYPE)
-        classification_model(train_features, test_features, labels, data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']], MODEL_TYPE, bac_map)
-    else:
-        for model_name in conf_dict_com['models']:
-            print (model_name)
-            classification_model(train_features, test_features, labels, data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']], model_name, bac_map)
+
+    return train_features, test_features
 
 
-start = time.time()
+def print_results(metr_dict,data_dict):
+	if data_dict['prob_type'] == 'multi-label':
+		print ("f1 Instance", metr_dict['avg_fi'])
+		print ("f1 Lable Macro", metr_dict['avg_fl_ma'])
+		print ("Jaccard Index", metr_dict['avg_ji'])
+		print ("f1 Lable Micro", metr_dict['avg_fl_mi'])
+		print ("Exact Match", metr_dict['avg_em'])
+		print ("Inverse Hamming Loss" , metr_dict['avg_ihl'])
+	elif data_dict['prob_type'] == 'multi-class':
+		print ("f1 Weighted", metr_dict['avg_f_we'])
+		print ("f1 Macro", metr_dict['avg_f_ma'])
+		print ("f1 Micro", metr_dict['avg_f_mi'])
+		print ("P Weighted", metr_dict['avg_p_we'])
+		print ("R Weighted", metr_dict['avg_r_we'])
+		print ("Accuracy", metr_dict['avg_acc'])
+	elif data_dict['prob_type'] == 'binary':
+		print ("f1", metr_dict['avg_f'])
+		print ("P", metr_dict['avg_p'])
+		print ("R", metr_dict['avg_r'])
+		print ("Accuracy", metr_dict['avg_acc'])
+
+
+
+startTIme = time.time()
 conf_dict_list, conf_dict_com = load_config(sys.argv[1])
-
-data_dict = load_data(conf_dict_com['filename'], conf_dict_com['data_path'], conf_dict_com['save_path'], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com['test_mode'])
-labels,n_class,bac_map,for_map =fit_trans_labels_powerset(data_dict['lab'][:data_dict['train_en_ind']])
-
-train(data_dict, labels, conf_dict_com['MODEL_TYPE'],conf_dict_com['feat_type'],bac_map,n_class,conf_dict_com)
+data_dict = load_data(conf_dict_com['filename'], conf_dict_com['data_path'], conf_dict_com['save_path'], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com['test_mode'],conf_dict_com["filename_map"])
+train_feat, test_feat = train(data_dict,conf_dict_com)
+print (conf_dict_com["prob_trans_types"][0])
+if conf_dict_com["prob_trans_types"][0] == "lp": 
+	labels,n_class,bac_map,for_map =fit_trans_labels_powerset(data_dict['lab'][:data_dict['train_en_ind']], data_dict['NUM_CLASSES'])
+	for model_name in conf_dict_com['models']:
+		print (model_name)
+		metr_dict = init_metr_dict(data_dict['prob_type'])
+		for run_ind in range(conf_dict_com["num_runs"]):
+			pred, true = classification_model(train_feat, test_feat, labels, data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']], model_name)
+			y_predict = powerset_vec_to_label_lists(pred,bac_map, data_dict['NUM_CLASSES'])
+			metr_dict = calc_metrics_print(y_predict, true, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
+		metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
+		print_results(metr_dict,data_dict)
+else:
+	labels = trans_labels_BR(data_dict['lab'][:data_dict['train_en_ind']], data_dict['NUM_CLASSES'])
+	for model_name in conf_dict_com['models']:
+		print (model_name)
+		metr_dict = init_metr_dict(data_dict['prob_type'])
+		for run_ind in range(conf_dict_com["num_runs"]):
+			predop = []
+			for i in range(len(labels)):
+				#pred, true= train(data_dict, labels[i], MODEL_TYPE)
+				pred, true = classification_model(train_feat, test_feat, labels[i], data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']], model_name)
+				predop.append(pred)
+			for j in range(len(predop[0])):
+				l= [v[j] for v in predop] 
+				s = sum(l)
+				if s == 0:
+					predop[data_dict['NUM_CLASSES']-1][j] = 1
+			y_predict= br_op_to_label_lists(predop)
+			metr_dict = calc_metrics_print(y_predict, true, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
+		metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
+		print_results(metr_dict,data_dict)
+			
 timeLapsed = int(time.time() - startTime + 0.5)
 t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
 print(t_str)
