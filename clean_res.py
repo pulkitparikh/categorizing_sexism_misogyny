@@ -5,24 +5,23 @@ only_inc_best_list = [
 ]
 #('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11', '', 'di', 'True'), ('hier_fuse', 'elm_cnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_rnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_cnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_rnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_cnn_11', '', 'di', 'True'), ('uni_sent', '', 'bert_pre_1', 'di', 'True'), ('uni_sent', '', 'bert_1', 'di', 'True'), ('uni_sent', '', 'use_1', 'di', 'True'), ('uni_sent', '', 'infersent_1', 'di', 'True')]
 remove_list = [
-	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'use~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'use~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert_pre~1~use~1~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'use~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', False),
-	# ('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~ling~rnn~1~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~c_rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~~~~~~~~', 'bert_pre~1~~~~', 'lp', 'True', True),
-	# ('flat_fuse', 'elmo~c_rnn~1~~~~~~~~~~~~~', '~~~~~', 'lp', 'True', False),
+	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'use~1~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert_pre~1~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~~~~~~~~', 'bert~1~use~1~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert~1~use~1~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', '~~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', '~~~~~', 'br', 'True', False),
+	('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~fasttext~rnn~3~~ling~rnn~4~', 'bert~1~use~1~infersent~1', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~1~~fasttext~rnn~1~~ling~rnn~1~', 'bert~1~use~1~infersent~1', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert~1~use~1~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert~1~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~cnn~1~~glove~cnn~2~~fasttext~cnn~3~~ling~cnn~4~', 'bert~1~use~1~infersent~1', 'br', 'True', True),
+	('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', '~~~~~', 'br', 'True', True),
+	('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~fasttext~c_rnn~3~~ling~c_rnn~4~', 'bert~1~use~1~infersent~1', 'br', 'True', True),
+	('flat_fuse', 'elmo~c_rnn~1~~~~~~~~~~~~~', '~~~~~', 'br', 'True', False),
 	]
 useless_list = []
 	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
@@ -288,12 +287,12 @@ with open(val_res_file, 'w') as f_fin:
 				w_fin.writerow(sep_row)
 
 #####################################################
-try:
-	with open(test_res_file,'r') as f:
-		reader = csv.DictReader(f, delimiter = '\t')
-		rows_prev = [sorted(tuple(d.items())) for d in list(reader)]
-except:
-	rows_prev = []
+# try:
+# 	with open(test_res_file,'r') as f:
+# 		reader = csv.DictReader(f, delimiter = '\t')
+# 		rows_prev = [sorted(tuple(d.items())) for d in list(reader)]
+# except:
+# 	rows_prev = []
 
 mod_best_dic_test = {}
 # model_dic_sorted_test = {}

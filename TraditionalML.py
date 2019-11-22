@@ -26,11 +26,7 @@ def get_embedding_weights(filename, sep):
     return embed_dict
 
 def get_embeddings_dict(vector_type, emb_dim):
-    if vector_type == 'sswe':
-        emb_dim==50
-        sep = '\t'
-        vector_file = '../sswe-h.txt'
-    elif vector_type =="glove":
+    if vector_type =="glove":
         sep = ' '
         vector_file = '../../glove.6B/glove.6B.' + str(emb_dim) + 'd.txt'
     
@@ -56,7 +52,7 @@ def get_model(m_type):
     elif m_type == "GBT":
         logreg = GradientBoostingClassifier(n_estimators= conf_dict_com['n_estimators'])
     else:
-        print ("ERROR: Please specify a correst model")
+        print ("ERROR: Please specify a correct model")
         return None
     return logreg
 
@@ -68,36 +64,35 @@ def tf_idf(input_train,input_test,count_vec):
     test_features= tfidf_transformer.transform(bow_transformer_test).toarray()
     return train_features,test_features
 
-def feat_conact(features_word,features_char,features_POS,doc_feat,len_post,adj,text):
+def feat_concat(features_word,features_char,features_POS,doc_feat,len_post,adj,text):
     features = []
     for i in range(len(text)): 
-            features_text = np.append(features_word[i], features_char[i])
-            features_text = np.append(features_text, features_POS[i])
-            features_text = np.append(features_text, doc_feat[i])
-            features_text = np.append(features_text, [len_post[i], adj[i]])
-            features.append(features_text)
+        features_text = np.append(features_word[i], features_char[i])
+        features_text = np.append(features_text, features_POS[i])
+        features_text = np.append(features_text, doc_feat[i])
+        features_text = np.append(features_text, [len_post[i], adj[i]])
+        features.append(features_text)
     return features
 
 def get_features(Tdata,emb,emb_size):
     features = []
     tknzr = TweetTokenizer()    
     for i in range(len(Tdata)):
-            concat = np.zeros(emb_size)
-            Tdata[i] = Tdata[i].lower()
-            text = ''.join([c for c in Tdata[i] if c not in punctuation])               
-            tok = tknzr.tokenize(text)
-            toklen = 1
-            for wor in range(len(tok)):
-                if tok[wor] in emb:
-                        toklen += 1
-                        flist = [float(i) for i in emb[str(tok[wor])]]
-                        concat= flist + concat
-            concat = concat/toklen
-            features.append(concat)
+        concat = np.zeros(emb_size)
+        Tdata[i] = Tdata[i].lower()
+        text = ''.join([c for c in Tdata[i] if c not in punctuation])               
+        tok = tknzr.tokenize(text)
+        toklen = 1
+        for wor in range(len(tok)):
+            if tok[wor] in emb:
+                toklen += 1
+                flist = [float(i) for i in emb[str(tok[wor])]]
+                concat= flist + concat
+        concat = concat/toklen
+        features.append(concat)
     return features
 
 def train(data_dict,conf_dict_com):
-
     print (conf_dict_com['feat_type'])
     if conf_dict_com['feat_type']== "wordngrams":
         print("Using word based features")
@@ -175,36 +170,12 @@ def train(data_dict,conf_dict_com):
         POS_traindata = [' '.join(i) for i in POS_train]
         POS_testdata = [' '.join(i) for i in POS_test]
         train_features_POS, test_features_POS = tf_idf(POS_traindata,POS_testdata,count_vec_word)
-        train_features = feat_conact(train_features_word,train_features_char,train_features_POS,doc_feat_train,len_post_train,adj_train,data_dict['text'][0:data_dict['train_en_ind']])
-        test_features = feat_conact(test_features_word,test_features_char,test_features_POS,doc_feat_test,len_post_test,adj_test,data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']])
+        train_features = feat_concat(train_features_word,train_features_char,train_features_POS,doc_feat_train,len_post_train,adj_train,data_dict['text'][0:data_dict['train_en_ind']])
+        test_features = feat_concat(test_features_word,test_features_char,test_features_POS,doc_feat_test,len_post_test,adj_test,data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']])
         print (np.shape(train_features))
         print (np.shape(test_features))
 
     return train_features, test_features
-
-
-def print_results(metr_dict,data_dict):
-	if data_dict['prob_type'] == 'multi-label':
-		print ("f1 Instance", metr_dict['avg_fi'])
-		print ("f1 Lable Macro", metr_dict['avg_fl_ma'])
-		print ("Jaccard Index", metr_dict['avg_ji'])
-		print ("f1 Lable Micro", metr_dict['avg_fl_mi'])
-		print ("Exact Match", metr_dict['avg_em'])
-		print ("Inverse Hamming Loss" , metr_dict['avg_ihl'])
-	elif data_dict['prob_type'] == 'multi-class':
-		print ("f1 Weighted", metr_dict['avg_f_we'])
-		print ("f1 Macro", metr_dict['avg_f_ma'])
-		print ("f1 Micro", metr_dict['avg_f_mi'])
-		print ("P Weighted", metr_dict['avg_p_we'])
-		print ("R Weighted", metr_dict['avg_r_we'])
-		print ("Accuracy", metr_dict['avg_acc'])
-	elif data_dict['prob_type'] == 'binary':
-		print ("f1", metr_dict['avg_f'])
-		print ("P", metr_dict['avg_p'])
-		print ("R", metr_dict['avg_r'])
-		print ("Accuracy", metr_dict['avg_acc'])
-
-
 
 startTIme = time.time()
 conf_dict_list, conf_dict_com = load_config(sys.argv[1])
@@ -221,7 +192,7 @@ if conf_dict_com["prob_trans_types"][0] == "lp":
 			y_predict = powerset_vec_to_label_lists(pred,bac_map, data_dict['NUM_CLASSES'])
 			metr_dict = calc_metrics_print(y_predict, true, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
 		metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
-		print_results(metr_dict,data_dict)
+		print_results(metr_dict,data_dict['prob_type'])
 else:
 	labels = trans_labels_BR(data_dict['lab'][:data_dict['train_en_ind']], data_dict['NUM_CLASSES'])
 	for model_name in conf_dict_com['models']:
@@ -241,7 +212,7 @@ else:
 			y_predict= br_op_to_label_lists(predop)
 			metr_dict = calc_metrics_print(y_predict, true, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
 		metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
-		print_results(metr_dict,data_dict)
+		print_results(metr_dict,data_dict['prob_type'])
 			
 timeLapsed = int(time.time() - startTime + 0.5)
 t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
