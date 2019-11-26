@@ -158,14 +158,8 @@ else:
         print (model_name)
         metr_dict = init_metr_dict(data_dict['prob_type'])
         for run_ind in range(conf_dict_com["num_runs"]):
-            y_pred_list = []
             pred, true = classification_model(train_feat, test_feat, labels_bin[0], data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']], model_name)
-
-            for predval in pred:
-                predval = np.squeeze(predval, -1)
-                y_pred = np.rint(predval).astype(int)
-                y_pred_list.append(y_pred)
-            metr_dict = calc_metrics_print(y_pred_list, true, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
+            metr_dict = calc_metrics_print(pred, true, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
         metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
         print_results(metr_dict,data_dict['prob_type'])
 			
