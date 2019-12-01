@@ -12,15 +12,15 @@ def is_model_hier(model_type):
     return True
   return False
 
-def load_data(filename, data_path, save_path, test_ratio, valid_ratio, rand_state, max_words_sent, test_mode, filename_map):
+def load_data(filename, data_path, save_path, test_ratio, valid_ratio, rand_state, max_words_sent, test_mode, filename_map, use_saved_data_stuff, save_data_stuff):
   data_dict_filename = ("%sraw_data~%s~%s~%s~%s~%s~%s.pickle" % (save_path, filename[:-4], test_ratio, valid_ratio, rand_state, max_words_sent, test_mode))
-  if os.path.isfile(data_dict_filename):
-    print("loading input data")
+  if use_saved_data_stuff and os.path.isfile(data_dict_filename):
+    print("loading input data dict")
     with open(data_dict_filename, 'rb') as f_data:
         data_dict = pickle.load(f_data)
   else:      
     cl_in_filename = ("%sraw_data~%s~%s.pickle" % (save_path, filename[:-4], max_words_sent))
-    if os.path.isfile(cl_in_filename):
+    if use_saved_data_stuff and os.path.isfile(cl_in_filename):
       print("loading cleaned unshuffled input")
       with open(cl_in_filename, 'rb') as f_cl_in:
           text, text_sen, label_lists, conf_map = pickle.load(f_cl_in)
@@ -52,9 +52,10 @@ def load_data(filename, data_path, save_path, test_ratio, valid_ratio, rand_stat
           label_ids = list(set([conf_map['LABEL_MAP'][cat] for cat in cat_list]))
           label_lists.append(label_ids)
 
-      print("saving cleaned unshuffled input")
-      with open(cl_in_filename, 'wb') as f_cl_in:
-        pickle.dump([text, text_sen, label_lists, conf_map], f_cl_in)
+      if save_data_stuff:
+        print("saving cleaned unshuffled input")
+        with open(cl_in_filename, 'wb') as f_cl_in:
+          pickle.dump([text, text_sen, label_lists, conf_map], f_cl_in)
 
     data_dict = {}  
     data_dict['text'], data_dict['text_sen'], data_dict['lab'] = shuffle(text, text_sen, label_lists, random_state = rand_state)
@@ -78,9 +79,10 @@ def load_data(filename, data_path, save_path, test_ratio, valid_ratio, rand_stat
     data_dict['NUM_CLASSES'] = len(data_dict['FOR_LMAP'])
     data_dict['prob_type'] = conf_map['prob_type']
 
-    print("saving input data")
-    with open(data_dict_filename, 'wb') as f_data:
-      pickle.dump(data_dict, f_data)
+    if save_data_stuff:
+      print("saving input data dict")
+      with open(data_dict_filename, 'wb') as f_data:
+        pickle.dump(data_dict, f_data)
 
   return data_dict
 
@@ -172,6 +174,39 @@ def di_op_to_label_lists(vecs):
     op_list.append(cat_l)    
   return op_list
 
+def di_list_op_to_label_lists(vecs_list, mod_op_list, NUM_CLASSES, classi_probs_label_info):
+  label_arr = np.zeros([len(vecs_list[0]), NUM_CLASSES], dtype=np.int64)
+  label_nn = np.zeros([len(vecs_list[0]), NUM_CLASSES], dtype=np.int64)
+  for ind, vecs in enumerate(vecs_list):
+    for i, vec in enumerate(vecs):
+      for j, val in enumerate(vec):
+        if val == 1:
+          label_nn[i, classi_probs_label_info[ind][j]] += 1 
+        else:
+          label_nn[i, classi_probs_label_info[ind][j]] -= 1 
+
+  for i in range(len(label_arr)):
+    for j in range(NUM_CLASSES):
+      if label_nn[i,j] > 0:
+        label_arr[i,j] = 1
+    if sum(label_arr[i]) == 0:
+      sum_dict = {c:0 for c in range(NUM_CLASSES)}
+      count_dict = {c:0 for c in range(NUM_CLASSES)}
+      for ind in range(len(vecs_list)):
+        for j, val in enumerate(mod_op_list[ind][0][i]):
+          sum_dict[classi_probs_label_info[ind][j]] += val
+          count_dict[classi_probs_label_info[ind][j]] += 1
+      max_val = 0
+      for c in range(NUM_CLASSES):
+        if sum_dict[c]/count_dict[c] > max_val:
+          max_val = sum_dict[c]/count_dict[c]
+          max_ind = c
+      label_arr[i,max_ind] = 1
+            #     if sum(y_pred[i]) == 0:
+            #         y_pred[i, np.argmax(mod_op[i])] = 1
+
+  return di_op_to_label_lists(label_arr)
+
 def map_labels_to_num(label_ids, NUM_CLASSES):
   arr = [0] * NUM_CLASSES
   for label_id in label_ids:
@@ -200,6 +235,22 @@ def trans_labels_multi_hot(org_lables, NUM_CLASSES):
     for label_id in label_ids:
       label_arr[sample_ind][label_id] = 1
   return label_arr 
+
+def trans_labels_multi_hot_list(org_lables, classi_probs_label_info):
+  label_arr_list = []
+  num_classes_list = []
+  for l_list in classi_probs_label_info:
+    label_arr = np.zeros([len(org_lables), len(l_list)], dtype=np.int64)
+    map_dict = {}
+    for ind, l in enumerate(l_list):
+      map_dict[l] = ind
+    for sample_ind, label_ids in enumerate(org_lables):
+      for label_id in label_ids:
+        if label_id in map_dict:
+          label_arr[sample_ind][map_dict[label_id]] = 1
+    label_arr_list.append(label_arr)
+    num_classes_list.append(len(l_list))
+  return num_classes_list, label_arr_list
 
 def trans_labels_BR(org_lables, NUM_CLASSES):
   label_lists_br = [np.zeros(len(org_lables), dtype=np.int64) for i in range(NUM_CLASSES)]

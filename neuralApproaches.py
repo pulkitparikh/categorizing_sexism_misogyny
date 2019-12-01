@@ -12,7 +12,7 @@ from gen_batch_keras import TrainGenerator, TestGenerator
 import pickle
 import json
 
-def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, thresh, att_flag, output_folder_name, fname_part_r_ind):
+def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, thresh, att_flag, output_folder_name, fname_part_r_ind, classi_probs_label_info):
     y_pred_list = []
     true_vals = data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']]
     num_test_samp = len(true_vals)
@@ -25,9 +25,6 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
             y_pred  = np.argmax(mod_op, 1)
         elif prob_trans_type == "di":        
             y_pred = np.rint(mod_op).astype(int)
-            for i in range(num_test_samp):
-                if sum(y_pred[i]) == 0:
-                    y_pred[i, np.argmax(mod_op[i])] = 1
         elif prob_trans_type == "dc":
             y_pred = np.zeros((mod_op.shape), dtype=np.int64)
             for ind_row, row in enumerate(mod_op):
@@ -51,7 +48,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
     if prob_trans_type == 'lp':
         pred_vals = powerset_vec_to_label_lists(y_pred_list[0], bac_map, data_dict['NUM_CLASSES'])
     elif prob_trans_type == "di" or prob_trans_type == "dc":        
-        pred_vals = di_op_to_label_lists(y_pred_list[0])
+        pred_vals = di_list_op_to_label_lists(y_pred_list, mod_op_list, data_dict['NUM_CLASSES'], classi_probs_label_info)
     elif prob_trans_type == "br":
         if data_dict['prob_type'] == 'multi-label':
             for i in range(len(true_vals)):
@@ -146,49 +143,52 @@ def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num
         K.clear_session()
     return mod_op, att_op
 
-def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, prob_trans_type, test_mode, save_fold_path):
-    filename = "%sclass_imb~%s~%s~%s.pickle" % (save_fold_path, class_imb_flag, prob_trans_type, test_mode)
-    if os.path.isfile(filename):
-        print("loading class imb for %s and %s; test mode = %s" % (class_imb_flag, prob_trans_type, test_mode))
+def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_list, prob_trans_type, test_mode, save_fold_path, use_saved_data_stuff, save_data_stuff, classi_probs_label_str):
+    filename = "%sclass_imb~%s~%s~%s~%s.pickle" % (save_fold_path, class_imb_flag, prob_trans_type, classi_probs_label_str, test_mode)
+    if use_saved_data_stuff and os.path.isfile(filename):
+        print("loading class imb for %s and %s; classi_probs_label_info = %s, test mode = %s" % (class_imb_flag, prob_trans_type, classi_probs_label_str, test_mode))
         with open(filename, 'rb') as f:
-            nonlin, out_vec_size, cw_list = pickle.load(f)
+            nonlin, out_vec_size_list, cw_list = pickle.load(f)
     else:
         if prob_trans_type == "lp":    
             nonlin = 'softmax'
-            out_vec_size = num_classes_var
+            out_vec_size_list = num_classes_list
             cw_list = [None]
         elif prob_trans_type == "di":    
             nonlin = 'sigmoid'
-            out_vec_size = num_classes_var
+            out_vec_size_list = num_classes_list
             cw_list = [None]
         elif prob_trans_type == "dc":    
             nonlin = 'softmax'
-            out_vec_size = num_classes_var
+            out_vec_size_list = num_classes_list
             cw_list = [None]
         elif prob_trans_type == "br":    
             nonlin = 'sigmoid'
-            out_vec_size = 1
-            cw_list = [None]*len(trainY_noncat_list)    
+            out_vec_size_list = [1]*len(trainY_noncat_list)
+            cw_list = [None]*len(trainY_noncat_list)
 
         if class_imb_flag:
+            cw_list = []
             if prob_trans_type == "di":
-                cw_arr = np.empty([num_classes_var, 2])
-                for i in range(num_classes_var):
-                    cw_arr[i] = class_weight.compute_class_weight('balanced', [0,1], trainY_noncat_list[0][:, i])
-                cw_list = [cw_arr]
+                for num_classes_var, trainY_noncat in zip(num_classes_list, trainY_noncat_list):
+                    cw_arr = np.empty([num_classes_var, 2])
+                    for i in range(num_classes_var):
+                        cw_arr[i] = class_weight.compute_class_weight('balanced', [0,1], trainY_noncat[:, i])
+                    cw_list.append(cw_arr)
             elif prob_trans_type == "dc":
-                cw_list = [weights_cat(trainY_noncat_list[0])]
-            elif prob_trans_type == "lp" or prob_trans_type == "br": 
-                cw_list = []
-                loss_func_list = []
                 for trainY_noncat in trainY_noncat_list:
+                    cw_list.append(weights_cat(trainY_noncat))
+            elif prob_trans_type == "lp" or prob_trans_type == "br": 
+                for num_classes_var, trainY_noncat in zip(num_classes_list, trainY_noncat_list):
                     tr_uniq = np.arange(num_classes_var)
                     cw_arr = class_weight.compute_class_weight('balanced', tr_uniq, trainY_noncat)
                     cw_list.append(cw_arr)
 
-        print("saving class imb for %s and %s; test mode = %s" % (class_imb_flag, prob_trans_type, test_mode))
-        with open(filename, 'wb') as f:
-            pickle.dump([nonlin, out_vec_size, cw_list], f)
+        if save_data_stuff:        
+            print("saving class imb for %s and %s; classi_probs_label_info = %s, test mode = %s" % (class_imb_flag, prob_trans_type, classi_probs_label_str, test_mode))
+            with open(filename, 'wb') as f:
+                pickle.dump([nonlin, out_vec_size_list, cw_list], f)
+
     if class_imb_flag:
         loss_func_list = []
         for cw_arr in cw_list:
@@ -204,30 +204,29 @@ def class_imb_loss_nonlin(trainY_noncat_list, class_imb_flag, num_classes_var, p
         if prob_trans_type == "lp":
             loss_func_list = ['categorical_crossentropy']
         elif prob_trans_type == "di":
-            loss_func_list = ['binary_crossentropy']
+            loss_func_list = ['binary_crossentropy']*len(trainY_noncat_list)
         elif prob_trans_type == "dc":
-            loss_func_list = [multi_cat_loss()]
+            loss_func_list = [multi_cat_loss()]*len(trainY_noncat_list)
         elif prob_trans_type == "br":    
             loss_func_list = ['binary_crossentropy']*len(trainY_noncat_list)
 
-    return loss_func_list, nonlin, out_vec_size, cw_list
+    return loss_func_list, nonlin, out_vec_size_list, cw_list
 
-def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path, NUM_CLASSES, data_prob_type):
-    filename = "%slabel_info~%s~%s.pickle" % (save_fold_path, prob_trans_type, test_mode)
-    if os.path.isfile(filename):
-        print("loading label info for %s; test mode = %s" % (prob_trans_type, test_mode))
+def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path, NUM_CLASSES, data_prob_type, classi_probs_label_info, classi_probs_label_str, use_saved_data_stuff, save_data_stuff):
+    filename = "%slabel_info~%s~%s~%s.pickle" % (save_fold_path, prob_trans_type, classi_probs_label_str, test_mode)
+    if use_saved_data_stuff and os.path.isfile(filename):
+        print("loading label info for %s; classi_probs_label_info = %s, test mode = %s" % (prob_trans_type, classi_probs_label_str, test_mode))
         with open(filename, 'rb') as f:
-            trainY_list, trainY_noncat_list, num_classes_var, bac_map = pickle.load(f)
+            trainY_list, trainY_noncat_list, num_classes_list, bac_map = pickle.load(f)
     else:
         if prob_trans_type == "lp":        
             lp_trainY, num_classes_var, bac_map, for_map = fit_trans_labels_powerset(data_trainY, NUM_CLASSES)
             print("num of LP classes: ", num_classes_var)
             trainY_noncat_list = [lp_trainY]
             trainY_list = [to_categorical(lp_trainY, num_classes=num_classes_var)]
+            num_classes_list = [num_classes_var]
         elif prob_trans_type == "di" or prob_trans_type == "dc":
-            num_classes_var = NUM_CLASSES
-            trainY_list = [trans_labels_multi_hot(data_trainY, NUM_CLASSES)]
-            print("num of direct classes: ", num_classes_var)
+            num_classes_list, trainY_list = trans_labels_multi_hot_list(data_trainY, classi_probs_label_info)
             bac_map = None
             trainY_noncat_list = list(trainY_list)
         elif prob_trans_type == "br":
@@ -235,10 +234,11 @@ def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path, NU
                 trainY_list = trans_labels_BR(data_trainY, NUM_CLASSES)
             elif data_prob_type == 'binary':
                 trainY_list = trans_labels_bin_classi(data_trainY)
-            num_classes_var = 2
+            num_classes_list = [2]*NUM_CLASSES
             bac_map = None
             trainY_noncat_list = list(trainY_list)
-        print("saving label info for %s; test mode = %s" % (prob_trans_type, test_mode))
-        with open(filename, 'wb') as f:
-            pickle.dump([trainY_list, trainY_noncat_list, num_classes_var, bac_map], f)
-    return trainY_list, trainY_noncat_list, num_classes_var, bac_map
+        if save_data_stuff:        
+            print("saving label info for %s; classi_probs_label_info = %s, test mode = %s" % (prob_trans_type, classi_probs_label_str, test_mode))
+            with open(filename, 'wb') as f:
+                pickle.dump([trainY_list, trainY_noncat_list, num_classes_list, bac_map], f)
+    return trainY_list, trainY_noncat_list, num_classes_list, bac_map
