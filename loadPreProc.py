@@ -177,34 +177,33 @@ def di_op_to_label_lists(vecs):
 def di_list_op_to_label_lists(vecs_list, mod_op_list, NUM_CLASSES, classi_probs_label_info):
   label_arr = np.zeros([len(vecs_list[0]), NUM_CLASSES], dtype=np.int64)
   label_nn = np.zeros([len(vecs_list[0]), NUM_CLASSES], dtype=np.int64)
+  sum_arr = np.zeros([len(vecs_list[0]), NUM_CLASSES])
+  count_arr = np.zeros([len(vecs_list[0]), NUM_CLASSES])
   for ind, vecs in enumerate(vecs_list):
     for i, vec in enumerate(vecs):
       for j, val in enumerate(vec):
+        act_ind = classi_probs_label_info[ind][j]
         if val == 1:
-          label_nn[i, classi_probs_label_info[ind][j]] += 1 
+          label_nn[i, act_ind] += 1 
         else:
-          label_nn[i, classi_probs_label_info[ind][j]] -= 1 
-
+          label_nn[i, act_ind] -= 1 
+        sum_arr[i, act_ind] += mod_op_list[ind][0][i][j]
+        count_arr[i, act_ind] += 1
   for i in range(len(label_arr)):
     for j in range(NUM_CLASSES):
       if label_nn[i,j] > 0:
         label_arr[i,j] = 1
+      elif label_nn[i,j] == 0:
+        label_arr[i,j] = np.rint(sum_arr[i,j]/count_arr[i,j]).astype(int)
+
     if sum(label_arr[i]) == 0:
-      sum_dict = {c:0 for c in range(NUM_CLASSES)}
-      count_dict = {c:0 for c in range(NUM_CLASSES)}
-      for ind in range(len(vecs_list)):
-        for j, val in enumerate(mod_op_list[ind][0][i]):
-          sum_dict[classi_probs_label_info[ind][j]] += val
-          count_dict[classi_probs_label_info[ind][j]] += 1
       max_val = 0
       for c in range(NUM_CLASSES):
-        if sum_dict[c]/count_dict[c] > max_val:
-          max_val = sum_dict[c]/count_dict[c]
+        cur_val = sum_arr[i, c]/count_arr[i, c]
+        if cur_val > max_val:
+          max_val = cur_val
           max_ind = c
       label_arr[i,max_ind] = 1
-            #     if sum(y_pred[i]) == 0:
-            #         y_pred[i, np.argmax(mod_op[i])] = 1
-
   return di_op_to_label_lists(label_arr)
 
 def map_labels_to_num(label_ids, NUM_CLASSES):
