@@ -104,15 +104,11 @@ def aggregate_metr(metr_dict, num_vals, prob_type):
 	for key in metrics[prob_type]:
 		s = 0
 		s_sq = 0
-		print(metr_dict[key])
 		for v in metr_dict[key]:
 			s += v
 			s_sq += v**2
 		avg_v = s/num_vals
 		metr_dict['avg_' + key] = avg_v
-		# print(avg_v)
-		# print(num_vals)
-		# print(s_sq)
 		metr_dict['std_' + key] = np.sqrt(s_sq/num_vals - avg_v**2)
 		metr_dict[key] = []
 	return metr_dict
