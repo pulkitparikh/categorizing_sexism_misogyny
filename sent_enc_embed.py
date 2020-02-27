@@ -57,8 +57,13 @@ def bert_embed_posts(posts, max_sent_cnt, embed_dim, data_fold_path):
 	return posts_arr
 
 def bert_flat_embed_posts(posts, embed_dim, data_fold_path):
+	posts_arr = np.zeros((len(posts), embed_dim))
 	bc = ConcurrentBertClient()
-	return bc.encode(posts)
+	bert_batch_size = 64
+	for ind in range(0, len(posts), bert_batch_size):
+		end_ind = min(ind+bert_batch_size, len(posts))
+		posts_arr[ind:end_ind, :] = bc.encode(posts[ind:end_ind])
+	return posts_arr
 
 def use_embed_posts(posts, max_sent_cnt, embed_dim, data_fold_path):
 	config = tf.ConfigProto()

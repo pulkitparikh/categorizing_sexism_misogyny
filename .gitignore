@@ -1,3 +1,4 @@
+*.txt
 data/AMI-datasets/
 data/*.txt
 data/*.csv

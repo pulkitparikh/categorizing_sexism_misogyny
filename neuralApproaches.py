@@ -12,6 +12,7 @@ from gen_batch_keras import TrainGenerator, TestGenerator
 import pickle
 import json
 
+# mod_op[i] is the probablity of the ith test sample's class being 1 (verified)
 def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, thresh, att_flag, output_folder_name, fname_part_r_ind, classi_probs_label_info):
     y_pred_list = []
     true_vals = data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']]
@@ -232,9 +233,10 @@ def transform_labels(data_trainY, prob_trans_type, test_mode, save_fold_path, NU
         elif prob_trans_type == "br":
             if data_prob_type == 'multi-label':
                 trainY_list = trans_labels_BR(data_trainY, NUM_CLASSES)
+                num_classes_list = [2]*NUM_CLASSES
             elif data_prob_type == 'binary':
                 trainY_list = trans_labels_bin_classi(data_trainY)
-            num_classes_list = [2]*NUM_CLASSES
+                num_classes_list = [2]
             bac_map = None
             trainY_noncat_list = list(trainY_list)
         if save_data_stuff:        

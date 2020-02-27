@@ -104,11 +104,15 @@ def aggregate_metr(metr_dict, num_vals, prob_type):
 	for key in metrics[prob_type]:
 		s = 0
 		s_sq = 0
+		print(metr_dict[key])
 		for v in metr_dict[key]:
 			s += v
 			s_sq += v**2
 		avg_v = s/num_vals
 		metr_dict['avg_' + key] = avg_v
+		# print(avg_v)
+		# print(num_vals)
+		# print(s_sq)
 		metr_dict['std_' + key] = np.sqrt(s_sq/num_vals - avg_v**2)
 		metr_dict[key] = []
 	return metr_dict
@@ -152,6 +156,12 @@ def print_results(metr_dict,prob_type):
 	lines = prep_write_lines(metr_dict, prob_type)
 	for line in lines:
 		print(line)
+
+def write_print_results_no_tsv(metr_dict, f_res, prob_type):
+	lines = prep_write_lines(metr_dict, prob_type)
+	for line in lines:
+		print(line)
+		f_res.write(line + '\n')
 
 def write_results(metr_dict, f_res, f_tsv, prob_type, model_type,word_feat_str,sent_enc_feat_str,classi_probs_label_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,rnn_type,conf_dict_com):
 	if prob_type == 'multi-label':

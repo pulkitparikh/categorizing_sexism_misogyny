@@ -7,6 +7,12 @@ only_inc_best_list = [
 remove_list = [
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_9_10+1_6_7_11_12_13+2_3_4_5_8', 'di', 'True', True),
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_8_10_11+4_5_6_7_9_12_13', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_4+11_7_12_5_3_10_6_13_2_8_9', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~fasttext~rnn~3~~ling~rnn~4~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_2_4+11_7_12_5_3_10_6_13_0_4_8_9+11_7_12_5_3_10_6_13_1_2_8_9', 'di', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'use~1~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
@@ -122,23 +128,23 @@ useless_list = []
 # output_fold = 'results/'
 # best_metr = 'f_I+f_Ma'
 
-# input_res_file_1 = 'results_mis/tsv1.txt'
-# input_res_file_2 = ''
-# output_fold = 'results_mis/'
-# best_metr = 'f-We'
+input_res_file_1 = 'results_mis/tsv1.txt'
+input_res_file_2 = ''
+output_fold = 'results_mis/'
+best_metr = 'f-We'
 
 # input_res_file_1 = 'results_det/tsv1.txt'
 # input_res_file_2 = ''
 # output_fold = 'results_det/'
 # best_metr = 'f'
 
-input_res_file_1 = 'results_mul/tsv1.txt'
-input_res_file_2 = ''
-output_fold = 'results_mul/'
-best_metr = 'f_I+f_Ma'
+# input_res_file_1 = 'results_mul/tsv1.txt'
+# input_res_file_2 = 'results_mul/tsv2.txt'
+# output_fold = 'results_mul/'
+# best_metr = 'f_I+f_Ma'
 
 remove_list.extend(useless_list)
-# remove_list = []
+remove_list = []
 
 val_res_file = output_fold + 'val_tsv.txt'
 test_res_file = output_fold + 'test_tsv.txt'
@@ -228,7 +234,8 @@ for row in rows:
 
 	att_d = int(row['att dim'])	
 	att_flag = True if att_d > 0 else False 
-	model_key = (row['model'], row['word feats'], row['sent feats'], row['classi probs labels'], row['trans'], row['class imb'], att_flag)
+	classi_probs_labels_val = row['classi probs labels'] if 'classi probs labels' in row else ''
+	model_key = (row['model'], row['word feats'], row['sent feats'], classi_probs_labels_val, row['trans'], row['class imb'], att_flag)
 
 	if row['test mode'] == "True":
 		if model_key in model_dic_test:
