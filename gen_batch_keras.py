@@ -83,6 +83,4 @@ class TestGenerator(keras.utils.Sequence):
         for sent_feat in self.sent_feats:
             X_inputs.append(sent_feat['feats'][list_IDs_temp])
 
-        print("list ids")    
-        print(list_IDs_temp)            
         return X_inputs
