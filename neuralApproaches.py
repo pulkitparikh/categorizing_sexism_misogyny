@@ -106,7 +106,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
 
     return pred_vals, true_vals, calc_metrics_print(pred_vals, true_vals, metr_dict, data_dict['NUM_CLASSES'], data_dict['prob_type'])
 
-def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num_cnn_filters, rnn_type, fname_part, loss_func, class_w, nonlin, out_vec_size, rnn_dim, att_dim, max_pool_k_val, stack_rnn_flag, cnn_kernel_set, m_ind, run_ind, save_folder_name, use_saved_model, gen_att, learn_rate, dropO1, dropO2, batch_size, num_epochs, save_model):
+def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num_cnn_filters, rnn_type, fname_part, loss_func, class_w, nonlin, out_vec_size, rnn_dim, att_dim, max_pool_k_val, stack_rnn_flag, cnn_kernel_set, m_ind, run_ind, save_folder_name, use_saved_model, gen_att, learn_rate, dropO1, dropO2, batch_size, num_epochs, save_model, save_trained_mod):
     att_op = None
     fname_mod_op = ("%s%s/iop~%d~%d.pickle" % (save_folder_name, fname_part, m_ind, run_ind))
     if use_saved_model and os.path.isfile(fname_mod_op):
@@ -134,9 +134,13 @@ def train_predict(word_feats, sent_enc_feats, trainY, data_dict, model_type, num
             os.makedirs(save_folder_name + fname_part, exist_ok=True)
             with open(fname_mod_op, 'wb') as f:
                 pickle.dump(mod_op, f)
-            if run_ind == 0 and m_ind == 0:
-                with open("%s%s/mod_sum.txt" % (save_folder_name, fname_part),'w') as fh:
-                    model.summary(print_fn=lambda x: fh.write(x + '\n'))                                                                
+            if run_ind == 0:
+                if save_trained_mod:
+                    fname_mod = ("%s%s/mod~%d.h5" % (save_folder_name, fname_part, m_ind))
+                    model.save(fname_mod)
+                if m_ind == 0:
+                    with open("%s%s/mod_sum.txt" % (save_folder_name, fname_part),'w') as fh:
+                        model.summary(print_fn=lambda x: fh.write(x + '\n'))                                                                
             if gen_att:
                 fname_att_op = ("%s%s/att_op~%d~%d.pickle" % (save_folder_name, fname_part, m_ind, run_ind))
                 with open(fname_att_op, 'wb') as f:

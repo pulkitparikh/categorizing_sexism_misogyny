@@ -25,7 +25,7 @@ def comb_vocab_dict(feat_name, embed_size, data_dict, test_mode, data_fold_path,
 			comb_vocab = pickle.load(f)
 	else:
 		filename = ("%scomb_word_list.pickle" % save_fold_path)
-		if os.path.isfile(filename):
+		if use_saved_word_feats and os.path.isfile(filename):
 			print("loading comb word list")
 			with open(filename, "rb") as ff:
 				comb_vocab_word_list_dict = pickle.load(ff)

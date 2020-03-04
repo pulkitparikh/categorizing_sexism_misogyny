@@ -100,7 +100,7 @@ def load_map(filename):
   for item in items:
     parts = [x.strip() for x in item.split('=')]
     conf_map[parts[0]] = literal_eval(parts[1])
-  print(conf_map)
+  # print(conf_map)
   return conf_map
 
 def load_config(filename):
