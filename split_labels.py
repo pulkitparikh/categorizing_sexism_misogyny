@@ -7,9 +7,9 @@ conf_dict_list, conf_dict_com = load_config(sys.argv[1])
 data_dict = load_data(conf_dict_com["filename"], conf_dict_com["data_folder_name"], conf_dict_com["save_folder_name"], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com["test_mode"], conf_dict_com["filename_map"], conf_dict_com['use_saved_data_stuff'], conf_dict_com['save_data_stuff'])
 
 max_group_id = 2
-r = 1
-# labs_in_all = [11,7,12,5,3,10,6,13]
-labs_in_all = []
+r = 2
+labs_in_all = [11,7,12,5,3,10,6,13]
+# labs_in_all = []
 
 res_path = "label_info_%s.txt" % (max_group_id+1)
 

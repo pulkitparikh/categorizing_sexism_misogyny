@@ -37,8 +37,8 @@ def shortlist_words(num_sample, filename, op_name, data_path):
 			if i == num_sample-1:
 				break
 
-shortlist_words(70000, 'unlab_minus_lab.txt', 'unlab_minus_lab_shortest_n.txt', 'data/')
-exit(1)
+# shortlist_words(70000, 'unlab_minus_lab.txt', 'unlab_minus_lab_shortest_n.txt', 'data/')
+# exit(1)
 
 def remove_lab_from_unlab(filename, op_name, all_data_file, data_path):
 	raw_fname = data_path + filename
@@ -75,8 +75,8 @@ def remove_lab_from_unlab(filename, op_name, all_data_file, data_path):
 					num_remain += 1
 	print("removed: %s, remaining %s" % (num_remove, num_remain))
 
-remove_lab_from_unlab('unlab_data_postids.csv', 'unlab_minus_lab.txt', 'data.csv', 'data/')
-exit(1)
+# remove_lab_from_unlab('unlab_data_postids.csv', 'unlab_minus_lab.txt', 'data.csv', 'data/')
+# exit(1)
 
 def remove_test_from_unlab(filename, op_name, fin_data_name, all_data_file, data_path, save_path):
 	raw_fname = data_path + filename
@@ -201,10 +201,10 @@ def batch_add(sen, all_sens, batch_sens, batch_size_data):
 		batch_sens.append(sen)
 	return batch_sens, all_sens
 
-def load_sen_data(filename, data_path, save_path, max_words_sent, batch_size_data, use_saved_sent_feats):
+def load_sen_data(filename, data_path, save_path, max_words_sent, batch_size_data, use_saved_sent_enc_feats):
 	raw_fname = data_path + filename
 	s_name = save_path + filename[:-4] + '.pickle'
-	if use_saved_sent_feats and os.path.isfile(s_name):
+	if use_saved_sent_enc_feats and os.path.isfile(s_name):
 		print("loading unlabled sens")
 		with open(s_name, 'r') as f:
 			all_sens, num_samps = json.load(f)
@@ -237,10 +237,10 @@ def calc_layer_widths(layer_percs, emb_dim):
 		layer_widths.append(np.rint(layer_perc*emb_dim).astype(int))
 	return layer_widths
 
-def gen_sent_feats(feat_name, data_sen, emb_dim, use_saved_sent_feats, save_sent_feats, data_fold_path, save_fold_path, batch_size_data, num_samps):
+def gen_sent_feats(feat_name, data_sen, emb_dim, use_saved_sent_enc_feats, save_sent_enc_feats, data_fold_path, save_fold_path, batch_size_data, num_samps):
 	print("computing %s unlabeled sent feats" % feat_name)
 	s_filename = ("%sunlab_sent_feat~%s.h5" % (save_fold_path, feat_name))
-	if use_saved_sent_feats and os.path.isfile(s_filename):
+	if use_saved_sent_enc_feats and os.path.isfile(s_filename):
 		print("loading %s unlabeled sent feats" % feat_name)
 		with h5py.File(s_filename, "r") as hf:
 			feats = hf['feats'][:]
@@ -252,7 +252,7 @@ def gen_sent_feats(feat_name, data_sen, emb_dim, use_saved_sent_feats, save_sent
 		elif feat_name == 'infersent':
 			feats = inferSent_embed_posts(data_sen, batch_size_data, emb_dim, data_fold_path)
 		feats = np.reshape(feats, (-1, emb_dim))[:num_samps]
-		if save_sent_feats:
+		if save_sent_enc_feats:
 			print("saving %s unlabeled sent feats" % feat_name)
 			with h5py.File(s_filename, "w") as hf:
 				hf.create_dataset('feats', data=feats)
@@ -260,19 +260,20 @@ def gen_sent_feats(feat_name, data_sen, emb_dim, use_saved_sent_feats, save_sent
 	return feats
 
 conf_dict_list, conf_dict_com = load_config(sys.argv[1])
-data_sen, num_samps = load_sen_data(conf_dict_com['filename'], conf_dict_com['data_folder_name'], conf_dict_com['save_folder_name'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com['BATCH_SIZE_DATA'], conf_dict_com['use_saved_sent_feats'])
+data_sen, num_samps = load_sen_data(conf_dict_com['filename'], conf_dict_com['data_folder_name'], conf_dict_com['save_folder_name'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com['BATCH_SIZE_DATA'], conf_dict_com['use_saved_sent_enc_feats'])
 print("num of unlab sens: %s" % num_samps)
 
 for conf_dict in conf_dict_list:
 	for feat_name, layer_percs in conf_dict['layer_info']:
-		feats = gen_sent_feats(feat_name, data_sen, conf_dict_com['poss_sent_feats_emb_dict'][feat_name], conf_dict_com['use_saved_sent_feats'], conf_dict_com['save_sent_feats'], conf_dict_com["data_folder_name"], conf_dict_com["save_folder_name"], conf_dict_com['BATCH_SIZE_DATA'], num_samps)
+		feats = gen_sent_feats(feat_name, data_sen, conf_dict_com['poss_sent_feats_emb_dict'][feat_name], conf_dict_com['use_saved_sent_enc_feats'], conf_dict_com['save_sent_enc_feats'], conf_dict_com["data_folder_name"], conf_dict_com["save_folder_name"], conf_dict_com['BATCH_SIZE_DATA'], num_samps)
 		layer_widths = calc_layer_widths(layer_percs, conf_dict_com['poss_sent_feats_emb_dict'][feat_name])
 		for loss_func in conf_dict['loss_funcs']:
 			for drop1 in  conf_dict['drop1']:
 				for drop2 in  conf_dict['drop2']:
 					startTime = time.time()
 					info_str = "feat: %s, layer_percs = %s, loss_func = %s, drop1 = %s, drop2 = %s" % (feat_name,layer_percs,loss_func,drop1,drop2)
-					fname_mod = "%smod_aut~%s+%s+%s+%s+%s.h5" % (conf_dict_com['save_folder_name'], feat_name,'_'.join([str(x) for x in layer_percs]),loss_func,drop1,drop2)
+					fname_part = "%s+%s+%s+%s+%s" % (feat_name,'_'.join([str(x) for x in layer_percs]),loss_func,drop1,drop2)
+					fname_mod = "%smod_aut~%s.h5" % (conf_dict_com['save_folder_name'], fname_part)
 					print(info_str)
 
 					if conf_dict_com['use_saved_model'] and os.path.isfile(fname_mod):
@@ -293,16 +294,18 @@ for conf_dict in conf_dict_list:
 						adam = optimizers.Adam(lr=conf_dict_com['LEARN_RATE'])
 						autoencoder.compile(loss=loss_func, optimizer=adam)
 
-						autoencoder.summary()
-						autoencoder.fit(feats, feats, epochs=conf_dict_com["EPOCHS"], shuffle=True, batch_size=conf_dict_com['BATCH_SIZE_AUTO'], verbose=1)
-						encoder.save(fname_mod)
+						with open("%sauto_sum~%s.txt" % (conf_dict_com['save_folder_name'], fname_part),'w') as fh:
+							autoencoder.summary(print_fn=lambda x: fh.write(x + '\n'))
 
-						timeLapsed = int(time.time() - startTime + 0.5)
-						hrs = timeLapsed/3600.
-						t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
-						print(t_str)
+						# autoencoder.fit(feats, feats, epochs=conf_dict_com["EPOCHS"], shuffle=True, batch_size=conf_dict_com['BATCH_SIZE_AUTO'], verbose=1)
+						# encoder.save(fname_mod)
 
-						K.clear_session()
+						# timeLapsed = int(time.time() - startTime + 0.5)
+						# hrs = timeLapsed/3600.
+						# t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
+						# print(t_str)
+
+						# K.clear_session()
 						# set_session(tf.set_sessionn(config=config))
 					print("encod dim: %d" % layer_widths[-1])                
 
