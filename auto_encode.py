@@ -297,15 +297,15 @@ for conf_dict in conf_dict_list:
 						with open("%sauto_sum~%s.txt" % (conf_dict_com['save_folder_name'], fname_part),'w') as fh:
 							autoencoder.summary(print_fn=lambda x: fh.write(x + '\n'))
 
-						# autoencoder.fit(feats, feats, epochs=conf_dict_com["EPOCHS"], shuffle=True, batch_size=conf_dict_com['BATCH_SIZE_AUTO'], verbose=1)
-						# encoder.save(fname_mod)
+						autoencoder.fit(feats, feats, epochs=conf_dict_com["EPOCHS"], shuffle=True, batch_size=conf_dict_com['BATCH_SIZE_AUTO'], verbose=1)
+						encoder.save(fname_mod)
 
-						# timeLapsed = int(time.time() - startTime + 0.5)
-						# hrs = timeLapsed/3600.
-						# t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
-						# print(t_str)
+						timeLapsed = int(time.time() - startTime + 0.5)
+						hrs = timeLapsed/3600.
+						t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
+						print(t_str)
 
-						# K.clear_session()
+						K.clear_session()
 						# set_session(tf.set_sessionn(config=config))
 					print("encod dim: %d" % layer_widths[-1])                
 
