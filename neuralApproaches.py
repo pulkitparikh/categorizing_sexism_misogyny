@@ -48,8 +48,10 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
 
     if prob_trans_type == 'lp':
         pred_vals = powerset_vec_to_label_lists(y_pred_list[0], bac_map, data_dict['NUM_CLASSES'])
-    elif prob_trans_type == "di" or prob_trans_type == "dc":        
+    elif prob_trans_type == "di":
         pred_vals = di_list_op_to_label_lists(y_pred_list, mod_op_list, data_dict['NUM_CLASSES'], classi_probs_label_info)
+    elif prob_trans_type == "dc":
+        pred_vals = di_op_to_label_lists(y_pred_list[0])
     elif prob_trans_type == "br":
         if data_dict['prob_type'] == 'multi-label':
             for i in range(len(true_vals)):
