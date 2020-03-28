@@ -163,6 +163,9 @@ def br_op_to_label_lists(vecs):
     op_list.append(cat_l)    
   return op_list
 
+def bin_classi_op_to_label_lists(vec):
+  return [[x] for x in vec]
+
 def di_op_to_label_lists(vecs):
   NUM_CLASSES = len(vecs[0])
   op_list = []

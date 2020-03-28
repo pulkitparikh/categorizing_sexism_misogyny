@@ -203,10 +203,12 @@ def calc_metrics_print(pred_vals, true_vals, metr_dict, NUM_CLASSES, prob_type):
 		metr_dict['f_we'].append(f1_score(true_vals_sc, pred_vals_sc, labels=np.arange(NUM_CLASSES), average='weighted'))
 		metr_dict['acc'].append(accuracy_score(true_vals_sc, pred_vals_sc))
 	elif prob_type == 'binary':
-		metr_dict['p'].append(precision_score(true_vals, pred_vals))
-		metr_dict['r'].append(recall_score(true_vals, pred_vals))
-		metr_dict['f'].append(f1_score(true_vals, pred_vals))
-		metr_dict['acc'].append(accuracy_score(true_vals, pred_vals))
+		pred_vals_sc = [labels[0] for labels in pred_vals]
+		true_vals_sc = [labels[0] for labels in true_vals]
+		metr_dict['p'].append(precision_score(true_vals_sc, pred_vals_sc))
+		metr_dict['r'].append(recall_score(true_vals_sc, pred_vals_sc))
+		metr_dict['f'].append(f1_score(true_vals_sc, pred_vals_sc))
+		metr_dict['acc'].append(accuracy_score(true_vals_sc, pred_vals_sc))
 	return metr_dict
 
 # actual metric-related functions ------------------------------------

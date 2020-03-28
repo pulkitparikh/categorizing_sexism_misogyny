@@ -59,7 +59,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
                     y_pred_list[arg_max_br_lists[i]][i] = 1
             pred_vals = br_op_to_label_lists(y_pred_list)
         elif data_dict['prob_type'] == 'binary':
-            pred_vals = y_pred_list[0]
+            pred_vals = bin_classi_op_to_label_lists(y_pred_list[0])
   
     if att_flag and (mod_op_list[0][1] is not None):
         true_vals_multi_hot = trans_labels_multi_hot(true_vals, data_dict['NUM_CLASSES'])

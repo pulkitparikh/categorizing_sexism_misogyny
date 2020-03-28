@@ -11,6 +11,7 @@ results/
 results_mis/
 saved/
 saved_mis/
+saved_det/
 *.pyc
 *pycache*
 extra_files/

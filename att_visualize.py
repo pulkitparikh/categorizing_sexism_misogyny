@@ -13,8 +13,9 @@ import pickle
 
 att_fold_name = "/home/pulkit/research/extented_sexismclassification/results/att_info/hier_fuse_elm_rnn_11+glo_rnn_21_bert_pre_1_di_True_100_234_lstm_100_200_1_False_True_"
 # att_fold_name = "/home/pulkit/research/extented_sexismclassification/results/att_info/hier_fuse~elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~~bert_pre~1~use~1~infersent~1~0_1_2_3_4_5_6_7_8_9_10_11_12_13~di~True~100~2_3_4~lstm~200~400~1~False~True~"
-att_fold_best_name = "/home/pulkit/research/extented_sexismclassification/results/att_info/hier_fuse~elmo~rnn~11~~glove~rnn~21~~~~~~~~~~bert_pre~1~~~~~0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13~di~True~100~2_3_4~lstm~300~500~1~False~True~"
+# att_fold_best_name = "/home/pulkit/research/extented_sexismclassification/results/att_info/hier_fuse~elmo~rnn~11~~glove~rnn~21~~~~~~~~~~bert_pre~1~~~~~0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13~di~True~100~2_3_4~lstm~300~500~1~False~True~"
 base_fname = "/home/pulkit/research/extented_sexismclassification/results/inst/flat_fuse_elm_rnn_1__di_True_100_234_lstm_200_300_1_False_True.txt"
+ours_fname = "/home/pulkit/research/extented_sexismclassification/results/inst/hier_fuse~elmo~rnn~11~~glove~rnn~21~~~~~~~~~~bert_pre~1~~~~~0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13~di~True~100~2_3_4~lstm~300~500~1~False~True.txt"
 
 n_test_samp = 1953
 # word_1_att_ind = 0
@@ -104,47 +105,102 @@ def cooccur_ana(att_fold_name, n_test_samp, sent_att_ind, FOR_LMAP, NUM_CLASSES)
 	f_summary.close()
 # cooccur_ana(att_fold_name, n_test_samp, sent_att_ind, conf_map['FOR_LMAP'], conf_map['FOR_LMAP'], len(conf_map['FOR_LMAP']))
 # exit(1)
-
-def error_ana(att_fold_name, n_test_samp, sent_att_ind, num_runs, conf_map):
-	min_num_labs = 1
-	max_mum_labs = 7
-	dict_list = []
-	for n_r in range(num_runs):
-		num_lab_dict = {}
-		for i in range(min_num_labs, max_mum_labs+1):
-			num_lab_dict[i] = {'pred_vals': [], 'true_vals': []}
-		dict_list.append(num_lab_dict)
-	print("dict list loaded")
-	# count = 0
-	f_summary = open("error_ana.txt", 'w')
-	# w_summary = csv.DictWriter(f_summary, fieldnames = ['index','text','att words','label','comp pred'], delimiter = '\t')
-	# w_summary.writeheader()
-	for n_r in range(num_runs):
-		for i in range(n_test_samp):
-			f_name = "%s%d/%d~s%d.json" % (att_fold_name, n_r, i, sent_att_ind)
-			with open(f_name, 'r') as f:
-				sent_att_dict =json.load(f)[0]
-			# if sent_att_dict['label'] == sent_att_dict['prediction']:
-			# 	continue
-			t_cats = di_op_to_label_lists([sent_att_dict['label']])[0]
-			p_cats = di_op_to_label_lists([sent_att_dict['prediction']])[0]
-
-			dict_list[n_r][len(t_cats)]['true_vals'].append(t_cats)
-			dict_list[n_r][len(t_cats)]['pred_vals'].append(p_cats)
-			# count = count + 1
-
+def write_error_ana(dict_list, conf_map, num_runs, min_num_labs, max_mum_labs, pred_freq_list, f_summary):
 	metr_dict = init_metr_dict(conf_map['prob_type'])
+	actu_freqs = {num_labs: 0 for num_labs in range(min_num_labs, max_mum_labs+1)}
+	pred_freqs = {num_labs: 0 for num_labs in range(min_num_labs, max_mum_labs+1)}
 	for num_labs in range(min_num_labs, max_mum_labs+1):
+		for n_r in range(num_runs): 
+			actu_freqs[num_labs] += len(dict_list[n_r][num_labs]['true_vals'])
+			pred_freqs[num_labs] += pred_freq_list[n_r][num_labs]
+		actu_freqs[num_labs] = round(actu_freqs[num_labs]/num_runs)
+		pred_freqs[num_labs] = round(pred_freqs[num_labs]/num_runs)
+
 		if len(dict_list[0][num_labs]['true_vals']) < min_samples:
 			continue 		
-		print(num_labs)
-		f_summary.write("%s\n" % num_labs)
+		print("number of labels per post: %s" % num_labs)
+		f_summary.write("number of labels per post: %s\n" % num_labs)
 		for n_r in range(num_runs): 
 			metr_dict = calc_metrics_print(dict_list[n_r][num_labs]['pred_vals'], dict_list[n_r][num_labs]['true_vals'], metr_dict, len(conf_map['FOR_LMAP']), conf_map['prob_type'])
 		metr_dict = aggregate_metr(metr_dict, num_runs, conf_map['prob_type'])
 
-		write_print_results_no_tsv(metr_dict, f_summary, conf_map['prob_type']) 
+		write_print_results_no_tsv(metr_dict, f_summary, conf_map['prob_type'])
 		f_summary.write("----------------------\n")                                                           
+		print("----------------------")                                                           
+
+	f_summary.write("# of labels per post\tfrequency wrt the true labels\tfrequency wrt the predicted labels\t\n")	
+	for num_labs in range(min_num_labs, max_mum_labs+1):
+		f_summary.write("%d\t%d\t%d\t\n" % (num_labs, actu_freqs[num_labs], pred_freqs[num_labs]))                                                           
+
+def error_ana(ours_fname, base_fname, n_test_samp, sent_att_ind, num_runs, conf_map):
+	min_num_labs = 1
+	max_mum_labs = 7
+	# count = 0
+	header_strings = ["Best proposed method", "Best baseline"]
+	f_summary = open("error_ana.txt", 'w')
+	# w_summary = csv.DictWriter(f_summary, fieldnames = ['index','text','att words','label','comp pred'], delimiter = '\t')
+	# w_summary.writeheader()
+	for file_ind, filename in enumerate([ours_fname, base_fname]):
+		dict_list = []
+		pred_freq_list = []
+		for n_r in range(num_runs):
+			num_lab_dict = {}
+			num_lab_freq_dict = {}
+			for i in range(min_num_labs, max_mum_labs+1):
+				num_lab_dict[i] = {'pred_vals': [], 'true_vals': []}
+				num_lab_freq_dict[i] = 0
+			dict_list.append(num_lab_dict)
+			pred_freq_list.append(num_lab_freq_dict)
+		# print("dict list loaded")
+
+		for n_r in range(num_runs):
+			with open(filename,'r') as f:
+				reader = csv.DictReader(f, delimiter = '\t')
+				rows = list(reader)
+			for i in range(n_test_samp):
+				# f_name = "%s%d/%d~s%d.json" % (att_fold_name, n_r, i, sent_att_ind)
+				# with open(f_name, 'r') as f:
+				# 	sent_att_dict =json.load(f)[0]
+				# # if sent_att_dict['label'] == sent_att_dict['prediction']:
+				# # 	continue
+				# t_cats = di_op_to_label_lists([sent_att_dict['label']])[0]
+				# p_cats = di_op_to_label_lists([sent_att_dict['prediction']])[0]
+
+				t_cats = [int(st.strip()) for st in rows[i]['actu cats'].split(',')]
+				p_cats = [int(st.strip()) for st in rows[i]['pred cats'].split(',')]
+
+				dict_list[n_r][len(t_cats)]['true_vals'].append(t_cats)
+				dict_list[n_r][len(t_cats)]['pred_vals'].append(p_cats)
+				pred_freq_list[n_r][len(p_cats)] += 1
+				# count = count + 1
+		f_summary.write("%s\n\n" % header_strings[file_ind])
+		print("%s\n" % header_strings[file_ind])
+		write_error_ana(dict_list, conf_map, num_runs, min_num_labs, max_mum_labs, pred_freq_list, f_summary)
+		f_summary.write("****************************\n")
+		print("****************************")
+
+	# dict_list = []
+	# for n_r in range(num_runs):
+	# 	num_lab_dict = {}
+	# 	for i in range(min_num_labs, max_mum_labs+1):
+	# 		num_lab_dict[i] = {'pred_vals': [], 'true_vals': []}
+	# 	dict_list.append(num_lab_dict)
+	# print("dict list loaded")
+
+	# for n_r in range(num_runs):
+	# 	with open(base_fname,'r') as f:
+	# 		reader = csv.DictReader(f, delimiter = '\t')
+	# 		base_rows = list(reader)
+	# 	for i in range(n_test_samp):
+	# 		t_cats = [int(st.strip()) for st in base_rows[i]['actu cats'].split(',')]
+	# 		p_cats = [int(st.strip()) for st in base_rows[i]['pred cats'].split(',')]
+
+	# 		dict_list[n_r][len(t_cats)]['true_vals'].append(t_cats)
+	# 		dict_list[n_r][len(t_cats)]['pred_vals'].append(p_cats)
+	# f_summary.write("\n****************************\nBest baseline\n")
+	# print("\n****************************\nBest baseline")
+	# write_error_ana(dict_list, conf_map, num_runs, min_num_labs, max_mum_labs, f_summary)
+
 
 	# c = 0		
 	# for num_lab, v in num_lab_dict.items():	
@@ -167,7 +223,8 @@ def error_ana(att_fold_name, n_test_samp, sent_att_ind, num_runs, conf_map):
 	# print(count)
 	# print(c)
 	f_summary.close()
-# error_ana(att_fold_best_name, n_test_samp, 2, 3, conf_map)
+# error_ana(att_fold_best_name, n_test_samp, 2, 1, conf_map)
+error_ana(ours_fname, base_fname, n_test_samp, 2, 1, conf_map)
 
 def better_results(att_fold_name, base_fname, n_test_samp, sent_att_ind, k_top, FOR_LMAP, sep_char):
 	cl_orig_dict = build_post_dict(True, True)
@@ -252,7 +309,7 @@ def better_results(att_fold_name, base_fname, n_test_samp, sent_att_ind, k_top, 
 	print(count)
 	f_summary.close()
 # better_results(att_fold_name, base_fname, n_test_samp, 4, k_top, conf_map['FOR_LMAP'], '~')
-better_results(att_fold_name, base_fname, n_test_samp, 2, k_top, conf_map['FOR_LMAP'], '_')
+# better_results(att_fold_name, base_fname, n_test_samp, 2, k_top, conf_map['FOR_LMAP'], '_')
 # for clust_ind, att_arr in enumerate(mod_op_list[0][1]):
 #     att_list = []
 #     if len(att_arr.shape) == 3:
