@@ -81,7 +81,7 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
                     fname_att = ("%s%d~w%d.json" % (att_path, ind, clust_ind))
                     for ind_sen, split_sen in enumerate(post_sens_split):
                         my_sen_dict = {}
-                        my_sen_dict['text'] = split_sen
+                        my_sen_dict['text'] = split_sen#[:data_dict['max_words_sent']]
                         my_sen_dict['label'] = true_vals_multi_hot_ind
                         my_sen_dict['prediction'] = y_pred_list_0_ind
                         my_sen_dict['posterior'] = mod_op_list_0_0_ind
@@ -96,11 +96,11 @@ def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, 
                     my_sen_dict['attention'] = att_arr[ind, :].tolist()
                     if fname_part_r_ind.startswith('hier_fuse'):
                         fname_att = ("%s%d~s%d.json" % (att_path, ind, clust_ind))
-                        my_sen_dict['text'] = data_dict['text_sen'][data_ind]
+                        my_sen_dict['text'] = data_dict['text_sen'][data_ind]#[:data_dict['max_num_sent']]
                         my_sen_dict['id'] = "%d~s%d" % (ind, clust_ind)
                     else:
                         fname_att = ("%s%d~w%d.json" % (att_path, ind, clust_ind))
-                        my_sen_dict['text'] = data_dict['text'][data_ind]
+                        my_sen_dict['text'] = data_dict['text'][data_ind].split(' ')#[:data_dict['max_post_length']]
                         my_sen_dict['id'] = "%d~w%d" % (ind, clust_ind)
                     att_list.append(my_sen_dict)
                 with open(fname_att, 'w') as f:
