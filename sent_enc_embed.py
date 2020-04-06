@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import h5py
-sys.path.insert(0, '/home/pulkit/research/InferSent')
+sys.path.insert(0, os.path.join(os.path.dirname(sys.path[0]),'InferSent'))
 from models import InferSent
 import tensorflow as tf
 import tensorflow_hub as hub
