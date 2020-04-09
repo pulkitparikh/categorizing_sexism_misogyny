@@ -1,10 +1,15 @@
 import csv
+import os
 
 fl_only_report_best = False
 only_inc_best_list = [
 ]
 #('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11', '', 'di', 'True'), ('hier_fuse', 'elm_cnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_rnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_cnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_rnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_cnn_11', '', 'di', 'True'), ('uni_sent', '', 'bert_pre_1', 'di', 'True'), ('uni_sent', '', 'bert_1', 'di', 'True'), ('uni_sent', '', 'use_1', 'di', 'True'), ('uni_sent', '', 'infersent_1', 'di', 'True')]
+exclude_files = ['tsv2.txt']
 remove_list = [
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'br', 'True', True),
+
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_9_10+1_6_7_11_12_13+2_3_4_5_8', 'di', 'True', True),
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_8_10_11+4_5_6_7_9_12_13', 'di', 'True', True),
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
@@ -12,7 +17,7 @@ remove_list = [
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_4+11_7_12_5_3_10_6_13_2_8_9', 'di', 'True', True),
 	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
 	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~fasttext~rnn~3~~ling~rnn~4~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_2_4+11_7_12_5_3_10_6_13_0_4_8_9+11_7_12_5_3_10_6_13_1_2_8_9', 'di', 'True', True),
+	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_2_4+11_7_12_5_3_10_6_13_0_4_8_9+11_7_12_5_3_10_6_13_1_2_8_9', 'di', 'True', True)
 	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'use~1~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
@@ -56,7 +61,7 @@ useless_list = []
 	# ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True', True),
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True', True),
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True', True),
-	# ('hier_fuse', 'elm_rnn_11', 'bert_pre_1', 'di', 'True', True),
+	# ('hier_fuse', 'elm_rnn_11', 'bert_pre_1', 'di', 'True', True)
 
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.9_0.8_0.7_0.6_0.5_mse_0.25_0.25_1', 'di', 'True', True),
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_0.9_0.8_0.7_mse_0.25_0.25_1', 'di', 'True', True),
@@ -106,6 +111,7 @@ useless_list = []
 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'),
 	# ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'),
 	# ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'),
+	# ]
 # useless_list = [
 # 	# ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_2', 'di', 'True', True),
 # 	('hier_fuse', 'elm_cnn_11', '', 'lp', 'False', True),
@@ -128,10 +134,10 @@ useless_list = []
 # output_fold = 'results/'
 # best_metr = 'f_I+f_Ma'
 
-input_res_file_1 = 'results_mis/tsv1.txt'
-input_res_file_2 = ''
-output_fold = 'results_mis/'
-best_metr = 'f-We'
+# input_res_file_1 = 'results_mis/tsv1.txt'
+# input_res_file_2 = ''
+# output_fold = 'results_mis/'
+# best_metr = 'f-We'
 
 # input_res_file_1 = 'results_det/tsv1.txt'
 # input_res_file_2 = ''
@@ -140,55 +146,85 @@ best_metr = 'f-We'
 
 # input_res_file_1 = 'results_mul/tsv1.txt'
 # input_res_file_2 = 'results_mul/tsv2.txt'
-# output_fold = 'results_mul/'
-# best_metr = 'f_I+f_Ma'
+output_fold = 'results_mul/'
+best_metr = 'f_I+f_Ma'
 
 remove_list.extend(useless_list)
-remove_list = []
+# remove_list = []
 
 val_res_file = output_fold + 'val_tsv.txt'
 test_res_file = output_fold + 'test_tsv.txt'
-def rem_dupli_text(f_name_1, f_name_2):
-	if f_name_2 == '':
-		rows2_org = []
-	else:
-		with open(f_name_2,'r') as res_tsv:
-			reader = csv.DictReader(res_tsv, delimiter = '\t')
-			rows2_org = list(reader)
-		p_remov_inds_2 = [False]*len(rows2_org)
+# def rem_dupli_text(f_name_1, f_name_2):
+# 	if f_name_2 == '':
+# 		rows2_org = []
+# 	else:
+# 		with open(f_name_2,'r') as res_tsv:
+# 			reader = csv.DictReader(res_tsv, delimiter = '\t')
+# 			rows2_org = list(reader)
+# 		p_remov_inds_2 = [False]*len(rows2_org)
 
-	p_best_dict_2 = {}
-	for ind, row in enumerate(rows2_org):
-		row_key = tuple(sorted(row.items(), key=lambda kv: kv[1]))
-		if row_key in p_best_dict_2:
-			p_remov_inds_2[p_best_dict_2[row_key]] = True
-		p_best_dict_2[row_key] = ind
+# 	p_best_dict_2 = {}
+# 	for ind, row in enumerate(rows2_org):
+# 		row_key = tuple(sorted(row.items(), key=lambda kv: kv[0]))
+# 		if row_key in p_best_dict_2:
+# 			p_remov_inds_2[p_best_dict_2[row_key]] = True
+# 		p_best_dict_2[row_key] = ind
 
-	with open(f_name_1,'r') as res_tsv:
-		reader = csv.DictReader(res_tsv, delimiter = '\t')
-		rows1_org = list(reader)
+# 	with open(f_name_1,'r') as res_tsv:
+# 		reader = csv.DictReader(res_tsv, delimiter = '\t')
+# 		rows1_org = list(reader)
 
-	p_best_dict_1 = {}
-	p_remov_inds_1 = [False]*len(rows1_org)
-	for ind, row in enumerate(rows1_org):
-		row_key = tuple(sorted(row.items(), key=lambda kv: kv[1]))
-		if row_key in p_best_dict_1:
-			p_remov_inds_1[p_best_dict_1[row_key]] = True
-		if row_key in p_best_dict_2:
-			p_remov_inds_2[p_best_dict_2[row_key]] = True
-		p_best_dict_1[row_key] = ind
+# 	p_best_dict_1 = {}
+# 	p_remov_inds_1 = [False]*len(rows1_org)
+# 	for ind, row in enumerate(rows1_org):
+# 		row_key = tuple(sorted(row.items(), key=lambda kv: kv[0]))
+# 		if row_key in p_best_dict_1:
+# 			p_remov_inds_1[p_best_dict_1[row_key]] = True
+# 		if row_key in p_best_dict_2:
+# 			p_remov_inds_2[p_best_dict_2[row_key]] = True
+# 		p_best_dict_1[row_key] = ind
 
-	rows2 = []
-	for ind, row in enumerate(rows2_org):
-		if p_remov_inds_2[ind] == False:
-			rows2.append(row)
+# 	rows2 = []
+# 	for ind, row in enumerate(rows2_org):
+# 		if p_remov_inds_2[ind] == False:
+# 			rows2.append(row)
 	
-	rows1 = []
-	for ind, row in enumerate(rows1_org):
-		if p_remov_inds_1[ind] == False:
-			rows1.append(row)
+# 	rows1 = []
+# 	for ind, row in enumerate(rows1_org):
+# 		if p_remov_inds_1[ind] == False:
+# 			rows1.append(row)
 
-	return rows1, rows2, reader.fieldnames + ['GPU']
+# 	return rows1, rows2, reader.fieldnames + ['GPU']
+
+def rem_dupli_text_new(f_name_list):
+	rows_org = []
+	for f_name in f_name_list:
+		with open(f_name,'r') as res_tsv:
+			reader = csv.DictReader(res_tsv, delimiter = '\t')
+			rows_org += list(reader)
+
+	p_remov_inds = [False]*len(rows_org)
+	p_best_dict = {}
+	for ind, row in enumerate(rows_org):
+		row_key = tuple(sorted(row.items(), key=lambda kv: kv[0]))
+		if row_key in p_best_dict:
+			p_remov_inds[p_best_dict[row_key]] = True
+		p_best_dict[row_key] = ind
+
+	rows = []
+	for ind, row in enumerate(rows_org):
+		if p_remov_inds[ind] == False:
+			row['GPU'] = '0'
+			rows.append(row)
+
+	return rows, reader.fieldnames + ['GPU']
+
+file_list = []
+for file in os.listdir(output_fold):
+	if file[-4:] == '.txt' and file.startswith('tsv') and file not in exclude_files:
+		file_list.append(output_fold + file)
+rows, my_fields = rem_dupli_text_new(file_list)
+
 
 # rev_input_res_file_1 = 'results/rev_tsv1.txt'
 # rev_input_res_file_2 = 'results/rev_tsv2.txt'
@@ -207,17 +243,17 @@ def rem_dupli_text(f_name_1, f_name_2):
 # revise_input(input_res_file_2, rev_input_res_file_2)
 # exit(1)
 
-rows1_raw, rows2_raw, my_fields = rem_dupli_text(input_res_file_1, input_res_file_2)
-rows1 = []
-for row in rows1_raw:
-	row['GPU'] = '0'
-	rows1.append(row)
-rows2 = []
-for row in rows2_raw:
-	row['GPU'] = '1'
-	rows2.append(row)
-rows = rows2 + rows1
-# rows = list({tuple(d.items()) for d in rows})
+# rows1_raw, rows2_raw, my_fields = rem_dupli_text(input_res_file_1, input_res_file_2)
+# rows1 = []
+# for row in rows1_raw:
+# 	row['GPU'] = '0'
+# 	rows1.append(row)
+# rows2 = []
+# for row in rows2_raw:
+# 	row['GPU'] = '1'
+# 	rows2.append(row)
+# rows = rows2 + rows1
+# # rows = list({tuple(d.items()) for d in rows})
 
 # with open('test.txt', 'w') as f_fin:
 # 	w_fin = csv.DictWriter(f_fin, fieldnames = my_fields, delimiter = '\t')
@@ -229,9 +265,8 @@ rows = rows2 + rows1
 model_dic_test = {}
 model_dic = {}
 for row in rows:
-	if row['rnn dim'] == '400':
+	if row['rnn dim'] == '400' or row['model'] == 'random':
 		continue
-
 	att_d = int(row['att dim'])	
 	att_flag = True if att_d > 0 else False 
 	classi_probs_labels_val = row['classi probs labels'] if 'classi probs labels' in row else ''
