@@ -7,11 +7,22 @@ conf_dict_list, conf_dict_com = load_config(sys.argv[1])
 data_dict = load_data(conf_dict_com["filename"], conf_dict_com["data_folder_name"], conf_dict_com["save_folder_name"], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com["test_mode"], conf_dict_com["filename_map"], conf_dict_com['use_saved_data_stuff'], conf_dict_com['save_data_stuff'])
 
 max_group_id = 2
-r = 2
-labs_in_all = [11,7,12,5,3,10,6,13]
-# labs_in_all = []
+r = 1
+# labs_in_all = [11,7,12,5,3,10,6,13]
+labs_in_all = []
 
 res_path = "label_info_%s.txt" % (max_group_id+1)
+
+def sort_by_train_coverage(trainY_list, num_labs):
+	train_coverage = np.zeros(num_labs)
+	for lset in trainY_list:
+		for l in lset:
+			train_coverage[l] += 1.0
+	train_coverage /= np.sum(train_coverage)
+	s_indices = np.argsort(train_coverage)
+	for class_ind in s_indices:
+		print("%d - %.3f" % (class_ind, train_coverage[class_ind]))		
+	print("--------------")
 
 def train_coverage(trainY_list, map_dict, num_labs):
 	train_coverage = np.zeros(num_labs)
@@ -77,7 +88,6 @@ def comb_rec(arr, out_a, ind, a_ind, n, r, out_l):
 		# arr[0] = arr[i]
 		# arr[i] = t
 	return
-
 arr = [i for i in range(max_group_id+1)]
 out_a = [0 for i in range(r)]
 out_l = []	
@@ -118,6 +128,7 @@ while True:
 		break
 
 with open(res_path, 'a') as f:
+	sort_by_train_coverage(data_dict['lab'][:data_dict['train_en_ind']], data_dict['NUM_CLASSES'])
 	# print(best_conf)
 	# print(max_sc)
 	# print(best_s_arr)
