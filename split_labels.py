@@ -1,5 +1,5 @@
 import numpy as np   
-from loadPreProc import *
+from load_pre_proc import *
 import sys
 import time
 
@@ -8,8 +8,8 @@ data_dict = load_data(conf_dict_com["filename"], conf_dict_com["data_folder_name
 
 max_group_id = 2
 r = 1
-# labs_in_all = [11,7,12,5,3,10,6,13]
-labs_in_all = []
+labs_in_all = [11,7,12,5,3,10,6,13]
+# labs_in_all = []
 
 res_path = "label_info_%s.txt" % (max_group_id+1)
 

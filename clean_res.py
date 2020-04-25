@@ -1,23 +1,23 @@
 import csv
 import os
 
-fl_only_report_best = True
+fl_only_report_best = False
 only_inc_best_list = [
 ]
 #('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1+use_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11+glo_rnn_21', 'bert_pre_2', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_21', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_cnn_11+glo_cnn_11', 'bert_pre_1', 'di', 'True'), ('hier_fuse', 'elm_rnn_11', '', 'di', 'True'), ('hier_fuse', 'elm_cnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_rnn_11', '', 'di', 'True'), ('hier_fuse', 'glo_cnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_rnn_11', '', 'di', 'True'), ('hier_fuse', 'fas_cnn_11', '', 'di', 'True'), ('uni_sent', '', 'bert_pre_1', 'di', 'True'), ('uni_sent', '', 'bert_1', 'di', 'True'), ('uni_sent', '', 'use_1', 'di', 'True'), ('uni_sent', '', 'infersent_1', 'di', 'True')]
-exclude_files = ['tsv2.txt']
-remove_list = [
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'br', 'True', True),
+exclude_files = []#'tsv2.txt']
+remove_list = []
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'br', 'True', True),
 
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_9_10+1_6_7_11_12_13+2_3_4_5_8', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_8_10_11+4_5_6_7_9_12_13', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_4+11_7_12_5_3_10_6_13_2_8_9', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
-	('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~fasttext~rnn~3~~ling~rnn~4~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
-	('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_2_4+11_7_12_5_3_10_6_13_0_4_8_9+11_7_12_5_3_10_6_13_1_2_8_9', 'di', 'True', True)
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_9_10+1_6_7_11_12_13+2_3_4_5_8', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_8_10_11+4_5_6_7_9_12_13', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '0_1_2_3_4_5_6_7_8_9_10_11_12_13+0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_4+11_7_12_5_3_10_6_13_2_8_9', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~fasttext~rnn~31~~ling~rnn~41~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~fasttext~rnn~3~~ling~rnn~4~', 'bert_pre~1~use~1~infersent~1', '0_1_2_3_4_5_6_7_8_9_10_11_12_13', 'di', 'True', True),
+	# ('hier_fuse', 'elmo~rnn~11~~glove~rnn~21~~~~~~~~~', 'bert_pre~1~~~~', '11_7_12_5_3_10_6_13_0_1_2_4+11_7_12_5_3_10_6_13_0_4_8_9+11_7_12_5_3_10_6_13_1_2_8_9', 'di', 'True', True)
 	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'use~1~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~~~~~~~~~~~~', 'bert~1~~~~', 'br', 'True', True),
@@ -35,7 +35,7 @@ remove_list = [
 	# ('flat_fuse', 'elmo~cnn~1~~~~~~~~~~~~~', '~~~~~', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~c_rnn~1~~glove~c_rnn~2~~fasttext~c_rnn~3~~ling~c_rnn~4~', 'bert~1~use~1~infersent~1', 'br', 'True', True),
 	# ('flat_fuse', 'elmo~c_rnn~1~~~~~~~~~~~~~', '~~~~~', 'br', 'True', False),
-	]
+	# ]
 useless_list = []
 	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~ling~rnn~3~~~~~', 'bert_pre~1~~~~', 'di', 'True', True),
 	# ('flat_fuse', 'elmo~rnn~1~~glove~rnn~2~~~~~~~~~', 'bert_pre~1~use~1~~', 'di', 'True', True),
@@ -224,7 +224,7 @@ for file in os.listdir(output_fold):
 	if file[-4:] == '.txt' and file.startswith('tsv') and file not in exclude_files:
 		file_list.append(output_fold + file)
 rows, my_fields = rem_dupli_text_new(file_list)
-
+# print(rows)
 
 # rev_input_res_file_1 = 'results/rev_tsv1.txt'
 # rev_input_res_file_2 = 'results/rev_tsv2.txt'
@@ -334,7 +334,7 @@ with open(val_res_file, 'w') as f_fin:
 				for row in model_dic_sorted[mod_key]:
 					w_fin.writerow(row)
 				w_fin.writerow(sep_row)
-
+# print(model_dic)
 #####################################################
 # try:
 # 	with open(test_res_file,'r') as f:
