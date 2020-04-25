@@ -1,4 +1,4 @@
-We hereby release the code used for our research paper under review at TWEB titled "Categorizing Sexism and Misogyny through Neural Approaches". Our implementation utilizes parts of the code from [1, 2, 3] and libraries Keras and Scikit-learn [4]. The following are brief descriptions of some of the contents of this repository. Any further information about the code can be obtained by emailing me (my email id is mentioned in the paper).
+We hereby release the code used for our research paper under review at TWEB titled "Categorizing Sexism and Misogyny through Neural Approaches". Our implementation utilizes parts of the code from [1, 2, 3] and libraries Keras and Scikit-learn [4]. The following are brief descriptions of some of the contents of this repository.
 
 1) main.py
 
