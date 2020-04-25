@@ -78,7 +78,6 @@ def insights_results(pred_vals, true_vals, posts, sen_posts, dyn_fname_part, out
 		f_err_inst.write("%s\t%d\t%d\t%.2f\t%s\t%s\t%.3f\n" % (post_reco, len(sen_post), num_words, num_words_sen, pr_str, ac_str, js))
 	f_err_inst.close()
 
-# insights_results_lab(pred_vals, true_vals, data_dict['lab'][0:data_dict['train_en_ind']], fname_part, conf_dict_com["output_folder_name"])
 def insights_results_lab(pred_vals, true_vals, train_labels, dyn_fname_part, out_fold, NUM_CLASSES, FOR_LMAP):
 	TP, FP, FN = components_F(pred_vals, true_vals, NUM_CLASSES)
 	train_coverage = np.zeros(NUM_CLASSES)
@@ -230,8 +229,6 @@ def inverse_hamming_loss(pred, act, NUM_CLASSES):
 	cnt = 0.0
 	for pr, ac in zip(pred, act):
 		cnt += set_diff(pr, ac)
-	# print ((len(pred)*NUM_CLASSES)-cnt)/(len(pred)*NUM_CLASSES)		
-	# print 1-hamming_loss(pred, act, NUM_CLASSES)
 	return ((len(pred)*NUM_CLASSES)-cnt)/(len(pred)*NUM_CLASSES)
 
 def F_metrics_instance(pred, act):
@@ -254,9 +251,6 @@ def F_metrics_label_macro(pred, act, NUM_CLASSES):
 	return F_metrics_label_macro_from_comp(TP, FP, FN, NUM_CLASSES)
 
 def F_metrics_label_macro_from_comp(TP, FP, FN, NUM_CLASSES):
-	# print TP
-	# print FP
-	# print FN
 	avgF = 0.0
 	avgP = 0.0
 	avgR = 0.0
@@ -265,9 +259,6 @@ def F_metrics_label_macro_from_comp(TP, FP, FN, NUM_CLASSES):
 		avgR += rec_label(tp, fn)
 		avgF += f_label(tp, fp, fn)
 
-	# f_scores = [f_label(tp, fp, fn) for tp, fp, fn in zip(TP,FP,FN)]
-	# precs = [prec_label(tp, fp) for tp, fp in zip(TP,FP)]
-	# recs = [rec_label(tp, fn) for tp, fn in zip(TP,FN)]
 	return avgP/NUM_CLASSES, avgR/NUM_CLASSES, avgF/NUM_CLASSES
 
 def F_metrics_label_micro(pred, act, NUM_CLASSES):
@@ -275,41 +266,7 @@ def F_metrics_label_micro(pred, act, NUM_CLASSES):
 	return F_metrics_label_micro_from_comp(TP, FP, FN)
 
 def F_metrics_label_micro_from_comp(TP, FP, FN):
-	# print TP
-	# print FP
-	# print FN
 	avgTP = np.mean(TP)
 	avgFP = np.mean(FP)
 	avgFN = np.mean(FN)
 	return prec_label(avgTP, avgFP), rec_label(avgTP, avgFN), f_label(avgTP, avgFP, avgFN)
-
-# act = [[1, 6, 16], [18], [1, 5], [3, 15]]
-# pred = [[16, 1, 6], [3, 6, 17], [1, 5, 2], [3, 15]]
-# print len(act)
-
-# print "exact_match"
-# print exact_match(pred, act)
-
-# print "jaccard_index_avg"
-# print jaccard_index_avg(pred, act)
-
-# print "inverse_hamming_loss"
-# print inverse_hamming_loss(pred, act)
-
-# print "F_metrics_instance"
-# p,r,f = F_metrics_instance(pred, act)
-# print p
-# print r
-# print f
-
-# print "F_metrics_label_macro"
-# p,r,f = F_metrics_label_macro(pred, act)
-# print p
-# print r
-# print f
-
-# print "F_metrics_label_micro"
-# p,r,f = F_metrics_label_micro(pred, act)
-# print p
-# print r
-# print f

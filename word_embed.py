@@ -1,4 +1,3 @@
-# import io
 import os
 import numpy as np
 import pickle
@@ -134,10 +133,6 @@ def prep_Xdata_both(var_hier, data_dict, test_mode, save_fold_path, dir_filepath
 		print("loading pad data for %s; test mode = %s" % (var_hier, test_mode))
 		with open(filename, "rb") as f:
 			pad_data = pickle.load(f) 
-		# with h5py.File(filename, "r") as hf:
-		# 	trainX = hf["trainX"][:]
-		# 	testX = hf["testX"][:]
-		# 	vocab = hf["vocab"][:]
 	else:
 		if var_hier == True:
 			pad_data = prep_Xdata_sent(data_dict['text_sen'][:data_dict['test_en_ind']], t, data_dict['max_num_sent'], data_dict['max_words_sent'])
@@ -146,10 +141,6 @@ def prep_Xdata_both(var_hier, data_dict, test_mode, save_fold_path, dir_filepath
 		print("saving pad data for %s; test mode = %s" % (var_hier, test_mode))
 		with open(filename, "wb") as f:
 			pickle.dump(pad_data, f) 
-		# with h5py.File(filename, "w") as hf:
-		#     hf.create_dataset("trainX", data=trainX)
-		#     hf.create_dataset("testX", data=testX)
-		#     hf.create_dataset("vocab", data=vocab)
 	for ID, feats_ID in enumerate(pad_data):
 		np.save(dir_filepath + str(ID) + '.npy', feats_ID)			
 	return vocab, pad_data.shape[1:]

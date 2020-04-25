@@ -34,8 +34,6 @@ def train_evaluate_model(trainY_list, true_vals, metr_dict, prob_type, NUM_CLASS
 		for l in lset:
 			train_coverage[l] += 1.0
 	train_coverage /= float(len(trainY_list))
-	# print(train_coverage)
-	# print(np.mean(train_coverage))
 
 	if prob_type == 'multi-label':
 		r_op = np.empty((len(true_vals), NUM_CLASSES), dtype=int)

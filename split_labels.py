@@ -30,48 +30,15 @@ def train_coverage(trainY_list, map_dict, num_labs):
 		for l in lset:
 			if l in map_dict:
 				train_coverage[map_dict[l]] += 1.0
-	# train_coverage /= float(len(trainY_list))
-	# print(train_coverage)
 	train_coverage /= np.sum(train_coverage)
-	# print(np.argsort(train_coverage))
 	return train_coverage
 
 def score(conf, train_c, max_group_id, out_l):
 	s_arr = np.zeros(max_group_id + 1)
-	# s_dict = {c:0 for c in range(max_group_id + 1)}
 	for c_ind, l_id in enumerate(conf):
 		for g_id in out_l[l_id]:
 			s_arr[g_id] += train_c[c_ind]
-	# s_arr = np.array(list(s_dict.values()))
-	# s_arr_norm = s_arr/np.sum(s_arr)
 	return -np.std(s_arr), s_arr
-
-# def score(conf, train_c, max_group_id, train_labs):
-# 	s_dict = {c:0 for c in range(max_group_id + 1)}
-# 	mem_dict = {c:{} for c in range(max_group_id + 1)}
-# 	for c_ind, g_id in enumerate(conf):
-# 		s_dict[g_id] += train_c[c_ind]
-# 		mem_dict[g_id][c_ind] = None
-# 	s_arr = np.array(list(s_dict.values()))
-# 	s_arr_norm = s_arr/np.sum(s_arr)
-
-# 	non_emp_count_arr = np.zeros(max_group_id+1)
-# 	for l_list in train_labs:
-# 		for g_id in range(max_group_id + 1):
-# 			for c in l_list:
-# 				if c in mem_dict[g_id]:
-# 					non_emp_count_arr[g_id] += 1
-# 					break
-# 	non_emp_count_arr_norm = non_emp_count_arr/np.sum(non_emp_count_arr)					
-# 	# print(non_emp_count_arr_norm)
-# 	# print(s_arr_norm)
-# 	# print(np.std(non_emp_count_arr_norm))
-# 	# print(np.std(s_arr_norm))
-# 	s1 = -np.std(non_emp_count_arr_norm)
-# 	s2 = -np.std(s_arr_norm)
-# 	return (s1+s2)/2, s1, s2, non_emp_count_arr, s_arr
-
-startTime = time.time()
 
 def comb_rec(arr, out_a, ind, a_ind, n, r, out_l):
 	if r == 0:
@@ -80,21 +47,17 @@ def comb_rec(arr, out_a, ind, a_ind, n, r, out_l):
 		return
 	for i in range(a_ind, n-r+1):
 		out_a[ind] = arr[i]
-		# t = arr[0]
-		# arr[0] = arr[i]
-		# arr[i] = t
 		comb_rec(arr, out_a, ind+1, i+1, n, r-1, out_l)
-		# t = arr[0]
-		# arr[0] = arr[i]
-		# arr[i] = t
 	return
+
+startTime = time.time()
+
 arr = [i for i in range(max_group_id+1)]
 out_a = [0 for i in range(r)]
 out_l = []	
 comb_rec(arr, out_a, 0, 0, len(arr), r, out_l)
 max_list_id = len(out_l)-1
 print(out_l)
-# exit()
 
 rem_labs = list(set(range(data_dict['NUM_CLASSES'])) - set(labs_in_all))
 map_dict = {}
@@ -110,14 +73,11 @@ conf = np.zeros(num_labs, dtype=np.int64)
 
 max_sc = -np.inf
 while True:
-	# print(conf)
-	# sc, s1, s2, non_emp_count_arr, s_arr = score(conf, train_c, max_group_id, data_dict['lab'][:data_dict['train_en_ind']])
-	sc, s_arr = score(conf, train_c, max_group_id, out_l)#, data_dict['lab'][:data_dict['train_en_ind']])
+	sc, s_arr = score(conf, train_c, max_group_id, out_l)
 	if sc > max_sc:
 		max_sc = sc
 		best_conf = list(conf)
 		best_s_arr =s_arr
-		# best_count_arr=non_emp_count_arr
 	for i in range(num_labs-1, -1, -1):
 		if conf[i] == max_list_id:
 			conf[i] = 0
@@ -129,16 +89,10 @@ while True:
 
 with open(res_path, 'a') as f:
 	sort_by_train_coverage(data_dict['lab'][:data_dict['train_en_ind']], data_dict['NUM_CLASSES'])
-	# print(best_conf)
-	# print(max_sc)
-	# print(best_s_arr)
-	# # print(best_count_arr)
-	# print("-----------")
 	classi_probs_label_info = [list(labs_in_all) for i in range(max_group_id+1)]
 	for class_ind, l_id in enumerate(best_conf):
 		for g_id in out_l[l_id]:
 			classi_probs_label_info[g_id].append(rem_labs[class_ind])
-	# print(classi_probs_label_info)
 
 	classi_probs_label_str = str(classi_probs_label_info)[2:-2].replace('], [', '+').replace(', ','_')
 

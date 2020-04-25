@@ -358,17 +358,7 @@ def get_model(m_type, word_cnt_post, sent_cnt, word_cnt_sent, word_feats, sen_en
         
     adam = optimizers.Adam(lr=learn_rate)
     model.compile(loss=loss_func, optimizer=adam)
-    # model.summary()
-    # print(att_mod.output_shape)
     return model, att_mod
-
-
-# # # word_feats = {'glove': {'embed_mat': np.zeros((20000, 300)), 'tune': True, 's_enc': 'cnn_rnn_sep', 'emb_size': 300, 'm_id': '113'}, 'elmo': {'s_enc': 'rnn', 'emb_size': 3072, 'm_id': '32'}, 'ling': {'s_enc': 'cnn', 'emb_size': 33, 'm_id': '22'}}
-# # # sen_enc_feats = {'infersent': {'emb_size': 4096, 'm_id': '1'}, 'use': {'emb_size': 512, 'm_id': '3'}}
-
-# word_feats = {'elmo': {'s_enc': 'cnn', 'm_id': '11', 'dim_shape': [100,300]}}#, 'glove': {'s_enc': 'rnn', 'm_id': '22', 'dim_shape': [100,300]}}
-# sen_enc_feats = {}#'use': {'m_id': '3', 'feats': np.zeros((100, 512))}, 'bert': {'m_id': '1', 'feats': np.zeros((100, 768))}}
-# get_model('c_bilstm', 200, 20, 100, word_feats, sen_enc_feats, 0.001, 0.1, 0.1, 80, 'lstm', 'binary_crossentropy', 'sigmoid', 14, 200, 0, 1, False, [2,3,4])
 
 # import numpy as np
 # word_feats = {'emb': 'elmo', 's_enc': 'c_rnn', 'm_id': '11', 'dim_shape': (100,3000)}, {'emb': 'glove', 's_enc': 'c_rnn', 'm_id': '21','dim_shape': [100,300]}

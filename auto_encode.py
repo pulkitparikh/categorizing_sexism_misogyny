@@ -20,7 +20,7 @@ def shortlist_words(num_sample, filename, op_name, data_path):
 	post_list = []
 	w_c_list = []
 	for post_org in open(raw_fname):
-		# should remove this rstrip; not sure how it came up
+		# should remove this rstrip
 		post = post_org.rstrip()
 		l = len(post.split())
 		if l < 7:
@@ -110,9 +110,6 @@ def remove_test_from_unlab(filename, op_name, fin_data_name, all_data_file, data
 		with open(s_name, 'w') as wfile:
 			reader = csv.DictReader(txtfile, delimiter = '\t')
 			for row in reader:
-				# print(row)
-				# if "seeing online articles being published" in row['post']:
-				# 	print(row)
 				row_clean = r_white.sub(' ', r_anum.sub('', row['post'].lower())).strip()
 				test_flag = False
 				for test_post in test_data:

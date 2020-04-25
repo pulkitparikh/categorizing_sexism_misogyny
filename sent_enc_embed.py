@@ -136,24 +136,6 @@ def infersent_flat_embed_posts(posts, embed_dim, data_fold_path):
 	model.build_vocab(posts, tokenize=False)
 	return model.encode(posts, tokenize=False, verbose=False)
 
-# p = [["everyday sexism is rampant", "we should not do that"], ["we should not do that"], ["everyday is rampant", "we should",  "not do that"], ["a", "b", "c", "d"]]
-# o = bert_embed_posts(p, 3, 1024, 35)
-# print(o)
-
-# o1 = inferSent_embed_posts_raw(p, 'word_vectors/glove.6B.300d.txt', 'data/infersent1.pkl', 2)
-
-# from loadPreProc import *
-# import pickle
-# conf_dict = load_config("data/config1.txt")
-# f_str =  conf_dict["filename"][:-4].split("/")[-1]
-# cl_in_filename = ("%scl_input_%s_%s_%s_%s.pickle" % (conf_dict["data_folder_name"], f_str, conf_dict['TEST_RATIO'], conf_dict['VALID_RATIO'], conf_dict['RANDOM_STATE']))
-# if conf_dict["use_saved_cleaned_input"] and os.path.isfile(cl_in_filename):
-#     print "loading cleaned input"
-#     with open(cl_in_filename, 'rb') as f_cl_in:
-#         data_dict, train_clean, val_clean, test_clean, train_sen_clean, val_sen_clean, test_sen_clean, trainX, valX, testX, trainX_sen, valX_sen, testX_sen, vocab = pickle.load(f_cl_in)
-# # o1 = inferSent_embed_posts_raw(train_sen_clean[:100], 'word_vectors/glove.6B.300d.txt', 'data/infersent1.pkl', trainX_sen.shape[1])
-# o1 = use_embed_posts(train_sen_clean[:100], trainX_sen.shape[1])
-# print o1
 def sent_enc_featurize(sent_enc_feats_raw, model_type, data_dict, poss_sent_enc_feats_emb_dict, use_saved_sent_enc_feats, save_sent_enc_feats, data_fold_path, save_fold_path, test_mode):
 	max_num_sent_enc_feats = 3
 	if len(sent_enc_feats_raw) > max_num_sent_enc_feats:

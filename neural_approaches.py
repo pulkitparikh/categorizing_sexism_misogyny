@@ -4,15 +4,12 @@ from dl_models import get_model, attLayer_hier, multi_binary_loss, br_binary_los
 from sklearn.utils import class_weight
 from load_pre_proc import *
 from eval_measures import *
-# from keras.models import load_model
-# from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from keras import backend as K
 from gen_batch_keras import TrainGenerator, TestGenerator
 import pickle
 import json
 
-# mod_op[i] is the probablity of the ith test sample's class being 1 (verified)
 def evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, thresh, att_flag, output_folder_name, fname_part_r_ind, classi_probs_label_info):
     y_pred_list = []
     true_vals = data_dict['lab'][data_dict['test_st_ind']:data_dict['test_en_ind']]

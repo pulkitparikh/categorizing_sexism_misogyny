@@ -1,5 +1,3 @@
-# for all prob trans types including BR, loss functions, evaluation logic verified. gen_batch.. and other parts too
-# dc - direct with (modified) cross entropy loss (not binary ce loss like with 'di'), softmax (not sigmoid), diff weights; 's_enc' used to encode flat posts too
 import os
 import time
 import sys

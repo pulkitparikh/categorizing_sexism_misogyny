@@ -16,10 +16,6 @@ from nltk.tokenize import TweetTokenizer
 import time
 
 def classification_model(X_train, X_test, y_train, y_tested, model_type):
-    # print ("Model Type:", model_type)
-    # print (X_train.shape)
-    # print (y_train)
-    # print (np.array(y_train).shape)
     model = get_model(model_type)
     model.fit(X_train,y_train)
     y_pred = model.predict(X_test)
