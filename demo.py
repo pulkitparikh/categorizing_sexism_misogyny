@@ -34,8 +34,6 @@ def gen_raw_output(num_saved_mods, saved_mod_path, test_generator, num_classes):
     mod_op_list = []
     for m_ind in range(num_saved_mods):
         model = load_model("%smod~%d.h5" % (saved_mod_path, m_ind), custom_objects={'attLayer_hier': attLayer_hier, 'multi_binary_of': multi_binary_loss(np.empty([num_classes, 2]))})
-        # model.summary()
-        # exit()
         mod_op = model.predict_generator(generator=test_generator, verbose=1, use_multiprocessing=False, workers=1)
         mod_op_list.append((mod_op, None))
     return mod_op_list
@@ -90,11 +88,6 @@ def predict_main(list_posts, data_folder_path, saved_model_path, temp_save_path)
         print(cl_post)
     word_feats, word_feat_str = word_featurize(word_feats_raw, model_type, data_dict, conf_dict_com['poss_word_feats_emb_dict'], False, False, data_folder_path, temp_save_path, True)
     sent_enc_feats, sent_enc_feat_str = sent_enc_featurize(sent_enc_feats_raw, model_type, data_dict, conf_dict_com['poss_sent_enc_feats_emb_dict'], False, False, data_folder_path, temp_save_path, True)
-    # print(word_feats)
-    # print(sent_enc_feats)
-    # print(sent_enc_feats[0]['feats'].shape)
-    # print(np.arange(data_dict['test_st_ind'], data_dict['test_en_ind']))
-    # exit()
     test_generator = TestGenerator(np.arange(data_dict['test_st_ind'], data_dict['test_en_ind']), word_feats, sent_enc_feats, data_dict, 64)
     mod_op_list = gen_raw_output(2, saved_model_path, test_generator, data_dict['NUM_CLASSES'])
   
@@ -114,8 +107,6 @@ with open(filename_accounts) as file_in:
     for post in file_in:
         list_posts.append(post)
 
-# list_posts = ['I am x. you are y', 'You are y']
-# print(list_posts)
 pred_categories = predict_main(list_posts, data_folder_path, saved_model_path, temp_save_path)
 
 for pred_categ in pred_categories:

@@ -40,7 +40,6 @@ def load_val_data(filename):
 
 	val_stats_dict = {}		
 	for key, list_list in model_dic.items():
-		# print(key)
 		val_stats_dict[key] = {}
 		val_stats_dict[key]['cnn filters'] = len(set(list_list[0]))
 		val_stats_dict[key]['max pool k'] = len(set(list_list[1]))
@@ -86,7 +85,6 @@ def split_sent_feats(sent_feats):
 def trans_notation(model, word_feats, sent_feats, att_dim):
 	out_str = ''
 	wf_list = split_word_feats(word_feats)
-	# print(wf_list)
 	w_clusts = {str(i): [] for i in range(1, max_num_word_feats+1, 1)}
 	for i in range(0, max_num_word_feats*max_num_word_attributes, max_num_word_attributes):
 		if wf_list[i] != '':
@@ -112,7 +110,6 @@ def trans_notation(model, word_feats, sent_feats, att_dim):
 			else:
 				out_str += "w%sf(%s), " % (alg_dict[wf_list[w_ind + 1]], w_str[:-2])
 	sf_list = split_sent_feats(sent_feats)
-	# print(sf_list)
 	for i in range(0, max_num_sent_enc_feats*max_num_sent_enc_attributes, max_num_sent_enc_attributes):
 		if sf_list[i] != '':
 			if model == 'hier_fuse':
@@ -179,21 +176,15 @@ for key, val_list in dict_d.items():
 		base_list = []
 		prop_list = []
 		f_fin.write("%%%s\n" % key_str)
-		# input()
 		for ind, row in enumerate(val_list):
-			# print(row)
-			# print(trans_notation(row['model'], row['word feats'], row['sent feats']))
-			# input()
 			meth_name, is_baseline = trans_notation(row['model'], row['word feats'], row['sent feats'], row['att dim'])
 			if key[1] == True:
 				mod_id = meth_name
-				# ("%s_%s_%s" % (row['model'], row['word feats'], row['sent feats']))
 			else:
 				mod_id = ("%s %s" % (meth_name, row['classi probs labels'].replace('_', '\_').replace('+', ' + ')))
 
 			if sys.argv[1] == 'hyper':
 				classi_probs_labels_val = row['classi probs labels'] if 'classi probs labels' in row else ''
-				# print(row)
 				cnn_fil, max_pool_k, rnn_dim, att_dim = gen_hyper_str(row['model'], row['word feats'], row['sent feats'], classi_probs_labels_val, row['trans'], row['class imb'], row['att dim'], row['cnn filters'], row['max pool k'], row['rnn dim'], row['att dim'])
 				st = ("%s & %s & %s & %s & %s\\\\\n" % (mod_id, rnn_dim, att_dim, cnn_fil, max_pool_k))
 			else:	
@@ -211,7 +202,6 @@ for key, val_list in dict_d.items():
 
 		if base_list != []:
 			f_fin.writelines(start_lines)
-			# f_fin.write('\\begin{tabular}{|c|p{2.8in}|c|c|c|c|}\n\hline\n&Approach & $F_I$ & $F_{macro}$ & $Acc_I$ & $F_{micro}$\\\n\hline\n\hline\n')
 			f_fin.write("\multirow{%s}{*}{Baselines} " % len(base_list))
 			for i in range(len(base_list)-1):
 				f_fin.write('& ' + base_list[i])
@@ -223,7 +213,6 @@ for key, val_list in dict_d.items():
 			st_line = cline_str
 		else:
 			f_fin.writelines(no_b_start_lines)
-			# f_fin.write('\begin{tabular}{p{2.8in}|c|c|c|c|}\n\hline\nApproach & $F_I$ & $F_{macro}$ & $Acc_I$ & $F_{micro}$\\\n\hline\n\hline\n')
 			s_add = ''
 			st_line = "\hline\n"
 
@@ -233,6 +222,5 @@ for key, val_list in dict_d.items():
 		f_fin.write(s_add + prop_list[len(prop_list)-1])
 
 		f_fin.writelines(end_lines)
-		# print("------------")
 
 
