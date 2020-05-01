@@ -1,12 +1,14 @@
+# run the command below on a seperate terminal before running the code
+# screen -L bert-serving-start -model_dir=../bert/uncased_L-12_H-768_A-12 -tuned_model_dir=../bert/tmp/pretraining_output/ -ckpt_name=model.ckpt-100000 -num_worker=1 -max_seq_len=None -device_map=0
 import re
-from loadPreProc import load_map, di_list_op_to_label_lists
+from load_pre_proc import load_map, di_list_op_to_label_lists
 from sent_enc_embed import sent_enc_featurize
 from word_embed import word_featurize
 from nltk import sent_tokenize
 from keras.models import load_model
 from gen_batch_keras import TrainGenerator, TestGenerator
 import numpy as np
-from dlModels import attLayer_hier, multi_binary_loss
+from dl_models import attLayer_hier, multi_binary_loss
 import os
 import sys
 
@@ -18,7 +20,7 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 set_session(tf.Session(config=config))
 
-filename_accounts = 'data/accounts_of_sexism.txt'
+filename_accounts = sys.argv[1]
 
 def evaluate_model(mod_op_list, data_dict, classi_probs_label_info):
     y_pred_list = []
@@ -84,12 +86,12 @@ def predict_main(list_posts, data_folder_path, saved_model_path, temp_save_path)
     classi_probs_label_info = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13],[0,1,2,3,4,5,6,7,8,9,10,11,12,13]]
 
     data_dict = load_data(list_posts, 16, 35, 198, data_folder_path + 'esp_class_maps.txt')
-    for cl_post in data_dict['text_sen']:
-        print(cl_post)
+    # for cl_post in data_dict['text_sen']:
+    #     print(cl_post)
     word_feats, word_feat_str = word_featurize(word_feats_raw, model_type, data_dict, conf_dict_com['poss_word_feats_emb_dict'], False, False, data_folder_path, temp_save_path, True)
     sent_enc_feats, sent_enc_feat_str = sent_enc_featurize(sent_enc_feats_raw, model_type, data_dict, conf_dict_com['poss_sent_enc_feats_emb_dict'], False, False, data_folder_path, temp_save_path, True)
     test_generator = TestGenerator(np.arange(data_dict['test_st_ind'], data_dict['test_en_ind']), word_feats, sent_enc_feats, data_dict, 64)
-    mod_op_list = gen_raw_output(2, saved_model_path, test_generator, data_dict['NUM_CLASSES'])
+    mod_op_list = gen_raw_output(len(classi_probs_label_info), saved_model_path, test_generator, data_dict['NUM_CLASSES'])
   
     pred_vals = evaluate_model(mod_op_list, data_dict, classi_probs_label_info)
     
