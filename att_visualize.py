@@ -21,6 +21,20 @@ k_top = 2
 min_samples = 10
 top_k_freq = 10
 
+def hist_num_label_per_post():
+	conf_map = load_map('data/esp_class_maps.txt')
+	data_file = 'data/data_trans.csv'
+	hist_vecor = np.zeros(10)
+	with open(data_file, 'r') as csvfile:
+		reader = csv.DictReader(csvfile, delimiter = '\t')
+		for row in reader:
+			cats = list(set([conf_map['LABEL_MAP'][cat] for cat in row['labels'].split(',')]))
+			num_cats = len(cats)
+			hist_vecor[num_cats] += 1
+	print(hist_vecor)
+hist_num_label_per_post()
+exit()
+
 def build_post_dict(task, use_saved_data, save_data):
 	filename = 'saved/cl_orig_dict~%s.pickle' % task
 	if use_saved_data and os.path.isfile(filename):
