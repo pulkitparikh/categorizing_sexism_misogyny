@@ -108,6 +108,8 @@ def cooccur_ana(att_fold_name, n_test_samp, sent_att_ind, FOR_LMAP, NUM_CLASSES)
 	f_summary.write("\n------------\n\n")	
 
 	f_summary.close()
+# conf_map = load_map('data/esp_class_maps.txt')	
+# cooccur_ana(att_fold_name, n_test_samp, sent_att_ind, conf_map['FOR_LMAP'], conf_map['FOR_LMAP'], len(conf_map['FOR_LMAP']))
 
 def write_error_ana(dict_list, conf_map, num_runs, min_num_labs, max_mum_labs, pred_freq_list, f_summary):
 	metr_dict = init_metr_dict(conf_map['prob_type'])
@@ -136,7 +138,7 @@ def write_error_ana(dict_list, conf_map, num_runs, min_num_labs, max_mum_labs, p
 	for num_labs in range(min_num_labs, max_mum_labs+1):
 		f_summary.write("%d\t%d\t%d\t\n" % (num_labs, actu_freqs[num_labs], pred_freqs[num_labs]))                                                           
 
-def error_ana(ours_fname, base_fname, sent_att_ind, num_runs, conf_map):
+def error_ana(ours_fname, base_fname, num_runs, conf_map):
 	min_num_labs = 1
 	max_mum_labs = 7
 	header_strings = ["Best proposed method", "Best baseline"]
@@ -173,6 +175,7 @@ def error_ana(ours_fname, base_fname, sent_att_ind, num_runs, conf_map):
 		print("****************************")
 
 	f_summary.close()
+# error_ana(ours_fname, base_fname, 1, load_map('data/esp_class_maps.txt'))
 
 def better_results(att_fold_name, base_fname, model_name, task, use_saved_data, sent_att_ind, k_top, FOR_LMAP, sep_char):
 	cl_orig_dict = build_post_dict(task, use_saved_data, True)
