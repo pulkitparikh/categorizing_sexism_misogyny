@@ -14,6 +14,11 @@ from collections import Counter
 from doc2vec_embed import *
 from nltk.tokenize import TweetTokenizer
 import time
+from sklearn.linear_model import SGDClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import VotingClassifier
+from sent_enc_embed import *
+from xgboost import XGBClassifier
 
 def classification_model(X_train, X_test, y_train, y_tested, model_type):
     model = get_model(model_type)
@@ -30,6 +35,13 @@ def get_model(m_type):
         logreg = LinearSVC(C=conf_dict_com['c_linear_SVC'],class_weight = conf_dict_com['class_weight'])
     elif m_type == "GBT":
         logreg = GradientBoostingClassifier(n_estimators= conf_dict_com['n_estimators'])
+    elif m_type == "EoC":
+        clf1 = LogisticRegression( C=0.7, penalty='l1',solver='saga')
+        clf2 = RandomForestClassifier(n_estimators=250, criterion= "entropy")
+        clf3 = SGDClassifier(loss="modified_huber", max_iter = 5, alpha = 0.01)
+        clf4 = MultinomialNB()
+        clf5 = XGBClassifier(max_depth=25, n_estimators = 200)
+        logreg = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('sgd', clf3),('mnb', clf4), ('gb', clf5)], voting='hard')
     else:
         print ("ERROR: Please specify a correct model")
         return None
@@ -52,6 +64,31 @@ def feat_concat(features_word,features_char,features_POS,doc_feat,len_post,adj,t
         features_text = np.append(features_text, [len_post[i], adj[i]])
         features.append(features_text)
     return features
+
+def get_glove_feat(data, max_post_length, embed_size, comb_vocab):
+    posts_arr = np.zeros((len(data), embed_size))
+    for ID, post in enumerate(data):
+        feats_ID = np.zeros((max_post_length, embed_size))
+        words = post.split(' ')
+        l = min(len(words), max_post_length)
+        for ind_w, w in enumerate(words[:l]):
+            feats_ID[ind_w, :] = comb_vocab[w]
+        posts_arr[ID] = np.mean(feats_ID,axis=0)
+    return posts_arr
+
+def get_mis_det_feat(text, use_embed_dim, data_path,glove_embed_dim, data_dict,TEST_MODE,save_path,use_saved_word_feats,save_word_feats, max_post_length,conf_dict_com):
+    sent_feats = use_flat_embed_posts(text, use_embed_dim, data_path)
+
+    count_vec = CountVectorizer(max_features = conf_dict_com['MAX_FEATURES'])
+    tfidf_transformer = TfidfTransformer()
+    bow_transformer= count_vec.fit_transform(text)
+    tfidf_feats = tfidf_transformer.fit_transform(bow_transformer).toarray()
+
+    comb_vocab = comb_vocab_dict('glove',glove_embed_dim, data_dict, TEST_MODE,data_path,save_path, use_saved_word_feats,save_word_feats)
+    glove_feat = get_glove_feat(text, max_post_length, glove_embed_dim,comb_vocab)
+    
+    feats = np.concatenate((sent_feats, tfidf_feats,glove_feat), axis=1)
+    return feats
 
 def train(data_dict,conf_dict_com):
     print (conf_dict_com['feat_type'])
@@ -129,7 +166,17 @@ def train(data_dict,conf_dict_com):
         test_features = feat_concat(test_features_word,test_features_char,test_features_POS,doc_feat_test,len_post_test,adj_test,data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']])
         print (np.shape(train_features))
         print (np.shape(test_features))
-
+    elif conf_dict_com['feat_type'] == "mis_det":
+        train_features = get_mis_det_feat(data_dict['text'][0:data_dict['train_en_ind']], conf_dict_com['poss_sent_enc_feats_emb_dict']['use'], conf_dict_com["data_path"],conf_dict_com['poss_word_feats_emb_dict']['glove'], data_dict, conf_dict_com['TEST_RATIO'],conf_dict_com['save_path'], conf_dict_com['use_saved_word_feats'],conf_dict_com['save_word_feats'], data_dict['max_post_length'],conf_dict_com)
+        print (train_features.shape)
+        test_features = get_mis_det_feat(data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], conf_dict_com['poss_sent_enc_feats_emb_dict']['use'], conf_dict_com["data_path"],conf_dict_com['poss_word_feats_emb_dict']['glove'], data_dict, conf_dict_com['TEST_RATIO'],conf_dict_com['save_path'], conf_dict_com['use_saved_word_feats'],conf_dict_com['save_word_feats'], data_dict['max_post_length'],conf_dict_com)
+        print (test_features.shape)
+    elif conf_dict_com['feat_type'] == "mis_classi":
+        count_vec = CountVectorizer(max_features = conf_dict_com['MAX_FEATURES'],ngram_range = (1,3))
+        train_vec= count_vec.fit_transform(data_dict['text'][0:data_dict['train_en_ind']])
+        test_vec =count_vec.transform(data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']])
+        train_features= train_vec.toarray()/ np.linalg.norm(train_vec.toarray())
+        test_features= test_vec.toarray()/ np.linalg.norm(train_vec.toarray())
     return train_features, test_features
 
 startTIme = time.time()
