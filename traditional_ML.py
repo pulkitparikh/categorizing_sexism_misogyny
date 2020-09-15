@@ -76,19 +76,16 @@ def get_glove_feat(data, max_post_length, embed_size, comb_vocab):
         posts_arr[ID] = np.mean(feats_ID,axis=0)
     return posts_arr
 
-def get_mis_det_feat(text, use_embed_dim, data_path,glove_embed_dim, data_dict,TEST_MODE,save_path,use_saved_word_feats,save_word_feats, max_post_length,conf_dict_com):
+def get_mis_det_feat(text, use_embed_dim, data_path,glove_embed_dim, data_dict,TEST_MODE,max_post_length,conf_dict_com):
     sent_feats = use_flat_embed_posts(text, use_embed_dim, data_path)
 
-    count_vec = CountVectorizer(max_features = conf_dict_com['MAX_FEATURES'])
-    tfidf_transformer = TfidfTransformer()
-    bow_transformer= count_vec.fit_transform(text)
-    tfidf_feats = tfidf_transformer.fit_transform(bow_transformer).toarray()
+    glove_feats = []
+    for i in range(len(text)):
+        arr = np.load(conf_dict_com['glove_filepath']+ str(i) + '.npy')
+        avg_words = np.mean(arr, axis=0)
+        glove_feats.append(avg_words)
 
-    comb_vocab = comb_vocab_dict('glove',glove_embed_dim, data_dict, TEST_MODE,data_path,save_path, use_saved_word_feats,save_word_feats)
-    glove_feat = get_glove_feat(text, max_post_length, glove_embed_dim,comb_vocab)
-    
-    feats = np.concatenate((sent_feats, tfidf_feats,glove_feat), axis=1)
-    return feats
+    return sent_feats,glove_feats
 
 def train(data_dict,conf_dict_com):
     print (conf_dict_com['feat_type'])
@@ -167,10 +164,14 @@ def train(data_dict,conf_dict_com):
         print (np.shape(train_features))
         print (np.shape(test_features))
     elif conf_dict_com['feat_type'] == "mis_det":
-        train_features = get_mis_det_feat(data_dict['text'][0:data_dict['train_en_ind']], conf_dict_com['poss_sent_enc_feats_emb_dict']['use'], conf_dict_com["data_path"],conf_dict_com['poss_word_feats_emb_dict']['glove'], data_dict, conf_dict_com['TEST_RATIO'],conf_dict_com['save_path'], conf_dict_com['use_saved_word_feats'],conf_dict_com['save_word_feats'], data_dict['max_post_length'],conf_dict_com)
-        print (train_features.shape)
-        test_features = get_mis_det_feat(data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], conf_dict_com['poss_sent_enc_feats_emb_dict']['use'], conf_dict_com["data_path"],conf_dict_com['poss_word_feats_emb_dict']['glove'], data_dict, conf_dict_com['TEST_RATIO'],conf_dict_com['save_path'], conf_dict_com['use_saved_word_feats'],conf_dict_com['save_word_feats'], data_dict['max_post_length'],conf_dict_com)
+        count_vec = CountVectorizer(max_features = conf_dict_com['MAX_FEATURES'])
+        tfidf_train_feats,tfidf_test_feats = tf_idf(data_dict['text'][0:data_dict['train_en_ind']],data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']],count_vec)
+        sent_train_feats, glove_train_feats = get_mis_det_feat(data_dict['text'][0:data_dict['train_en_ind']], conf_dict_com['poss_sent_enc_feats_emb_dict']['use'], conf_dict_com["data_path"],conf_dict_com['poss_word_feats_emb_dict']['glove'], data_dict, conf_dict_com['TEST_RATIO'], data_dict['max_post_length'],conf_dict_com)       
+        train_features = np.concatenate((sent_train_feats, tfidf_train_feats,glove_train_feats), axis=1)
+        sent_test_feats, glove_test_feats = get_mis_det_feat(data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], conf_dict_com['poss_sent_enc_feats_emb_dict']['use'], conf_dict_com["data_path"],conf_dict_com['poss_word_feats_emb_dict']['glove'], data_dict, conf_dict_com['TEST_RATIO'],data_dict['max_post_length'],conf_dict_com)
+        test_features = np.concatenate((sent_test_feats, tfidf_test_feats,glove_test_feats), axis=1)
         print (test_features.shape)
+        print (train_features.shape)
     elif conf_dict_com['feat_type'] == "mis_classi":
         count_vec = CountVectorizer(max_features = conf_dict_com['MAX_FEATURES'],ngram_range = (1,3))
         train_vec= count_vec.fit_transform(data_dict['text'][0:data_dict['train_en_ind']])
@@ -179,7 +180,7 @@ def train(data_dict,conf_dict_com):
         test_features= test_vec.toarray()/ np.linalg.norm(train_vec.toarray())
     return train_features, test_features
 
-startTIme = time.time()
+startTime = time.time()
 conf_dict_list, conf_dict_com = load_config(sys.argv[1])
 data_dict = load_data(conf_dict_com['filename'], conf_dict_com['data_path'], conf_dict_com['save_path'], conf_dict_com['TEST_RATIO'], conf_dict_com['VALID_RATIO'], conf_dict_com['RANDOM_STATE'], conf_dict_com['MAX_WORDS_SENT'], conf_dict_com['test_mode'],conf_dict_com["filename_map"])
 train_feat, test_feat = train(data_dict,conf_dict_com)
