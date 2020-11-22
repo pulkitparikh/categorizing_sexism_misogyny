@@ -42,7 +42,10 @@ def rem_dupli_text_new(f_name_list):
 			row['GPU'] = '0'
 			rows.append(row)
 
-	return rows, reader.fieldnames + ['GPU']
+	if reader.fieldnames[-1] == 'GPU':
+		return rows, reader.fieldnames
+	else:
+		return rows, reader.fieldnames + ['GPU']
 
 file_list = []
 for file in os.listdir(output_fold):
