@@ -138,6 +138,9 @@ def write_error_ana(dict_list, conf_map, num_runs, min_num_labs, max_mum_labs, p
 	for num_labs in range(min_num_labs, max_mum_labs+1):
 		f_summary.write("%d\t%d\t%d\t\n" % (num_labs, actu_freqs[num_labs], pred_freqs[num_labs]))                                                           
 
+# Results and frequencies across numbers of labels per post
+# The number of runs used to calc the results and frequencies is the same (1).
+# The classification metrics (F_macro etc.) are generated on the test set partitions generated using the actual numbers of label per post
 def error_ana(ours_fname, base_fname, num_runs, conf_map):
 	min_num_labs = 1
 	max_mum_labs = 7
