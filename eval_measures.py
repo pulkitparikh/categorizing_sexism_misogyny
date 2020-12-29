@@ -78,7 +78,39 @@ def insights_results(pred_vals, true_vals, posts, sen_posts, dyn_fname_part, out
 		f_err_inst.write("%s\t%d\t%d\t%.2f\t%s\t%s\t%.3f\n" % (post_reco, len(sen_post), num_words, num_words_sen, pr_str, ac_str, js))
 	f_err_inst.close()
 
-def insights_results_lab(pred_vals, true_vals, train_labels, dyn_fname_part, out_fold, NUM_CLASSES, FOR_LMAP):
+def insights_results_lab(pred_vals_across_runs, true_vals, train_labels, dyn_fname_part, out_fold, num_runs, NUM_CLASSES, FOR_LMAP):
+	inst_fold_str = ("%slab/" % (out_fold))
+	os.makedirs(inst_fold_str, exist_ok=True)
+	dyn_fname_lab = ("%s%s.txt" % (inst_fold_str, dyn_fname_part))
+	f_err_lab = open(dyn_fname_lab, 'w')
+	f_err_lab.write("lab id\tlabel\ttrain cov\tPrec\tRecall\tF score\n")
+	train_coverage = np.zeros(NUM_CLASSES)
+	for lset in train_labels:
+		for l in lset:
+			train_coverage[l] += 1.0
+	train_coverage /= float(len(train_labels))
+	class_acc = []
+	for class_ind in range(NUM_CLASSES):
+		class_acc.append({'P': [], 'R': [], 'F': []})
+	for i in range(num_runs):
+		class_ind = 0
+		TP, FP, FN = components_F(pred_vals_across_runs[i], true_vals, NUM_CLASSES)
+		for tp, fp, fn in zip(TP,FP,FN):
+			P = prec_label(tp, fp)
+			R = rec_label(tp, fn)
+			F  = f_label(tp, fp, fn)
+			class_acc[class_ind]['P'].append(P)
+			class_acc[class_ind]['R'].append(R)
+			class_acc[class_ind]['F'].append(F)
+			class_ind += 1
+	for class_ind in range(NUM_CLASSES):
+		mean_P = np.mean(class_acc[class_ind]['P'])
+		mean_R = np.mean(class_acc[class_ind]['R'])
+		mean_F = np.mean(class_acc[class_ind]['F'])
+		f_err_lab.write("%d\t%s\t%.2f\t%.3f\t%.3f\t%.3f\n" % (class_ind, FOR_LMAP[class_ind],train_coverage[class_ind]*100,mean_P,mean_R,mean_F))
+	f_err_lab.close()
+
+def insights_results_lab_one_run(pred_vals, true_vals, train_labels, dyn_fname_part, out_fold, NUM_CLASSES, FOR_LMAP):
 	TP, FP, FN = components_F(pred_vals, true_vals, NUM_CLASSES)
 	train_coverage = np.zeros(NUM_CLASSES)
 	for lset in train_labels:

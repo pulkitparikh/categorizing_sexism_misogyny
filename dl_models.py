@@ -12,20 +12,20 @@ def sen_embed(enc_algo, sen_word_emb, word_cnt_sent, word_emb_len, num_cnn_filte
             rnn_sen_mod, att_mod = rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type)
             rnn_sen_emb_output = TimeDistributed(rnn_sen_mod)(sen_word_emb)    
             att_outputs.append(TimeDistributed(att_mod)(sen_word_emb))
-            # rnn_sen_mod.summary()
+            rnn_sen_mod.summary()
         else:
             rnn_sen_emb_output = TimeDistributed(rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type))(sen_word_emb)    
         return [rnn_sen_emb_output], att_outputs
     elif enc_algo == "cnn":
         cnn_sen_mod = cnn_sen_embed(word_cnt_sent, word_emb_len, num_cnn_filters, max_pool_k_val, kernel_sizes) 
-        # cnn_sen_mod.summary()
+        cnn_sen_mod.summary()
         return [TimeDistributed(cnn_sen_mod)(sen_word_emb)], att_outputs
     elif enc_algo == 'c_rnn':
         if att_dim > 0:
             c_rnn_sen_mod, att_mod = c_rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes)
             c_rnn_sen_emb_output = TimeDistributed(c_rnn_sen_mod)(sen_word_emb)    
             att_outputs.append(TimeDistributed(att_mod)(sen_word_emb))
-            # c_rnn_sen_mod.summary()
+            c_rnn_sen_mod.summary()
         else:
             c_rnn_sen_emb_output = TimeDistributed(c_rnn_sen_embed(word_cnt_sent, word_emb_len, rnn_dim, att_dim, rnn_type, num_cnn_filters, kernel_sizes))(sen_word_emb)    
         return [c_rnn_sen_emb_output], att_outputs

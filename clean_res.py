@@ -1,5 +1,6 @@
 import csv
 import os
+import sys
 
 fl_only_report_best = False
 only_inc_best_list = []
@@ -47,8 +48,13 @@ def rem_dupli_text_new(f_name_list):
 	else:
 		return rows, reader.fieldnames + ['GPU']
 
+if sys.argv[1:]:
+	filenames = sys.argv[1:]
+else:
+	filenames = os.listdir(output_fold)
+
 file_list = []
-for file in os.listdir(output_fold):
+for file in filenames:
 	if file[-4:] == '.txt' and file.startswith('tsv') and file not in exclude_files:
 		file_list.append(output_fold + file)
 rows, my_fields = rem_dupli_text_new(file_list)

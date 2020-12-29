@@ -8,6 +8,7 @@ data/*.sh
 data/word_sent_embed/
 data/ids_files/
 results/
+results_mul/
 results_mis/
 saved/
 saved_mis/

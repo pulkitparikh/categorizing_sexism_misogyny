@@ -62,6 +62,7 @@ for conf_dict in conf_dict_list:
                                                         startTime = time.time()
                                                         info_str = "model: %s, word_feats = %s, sent_enc_feats = %s, classi_probs_label_info = %s, prob_trans_type = %s, class_imb_flag = %s, num_cnn_filters = %s, cnn_kernel_set = %s, rnn_type = %s, rnn_dim = %s, att_dim = %s, max_pool_k_val = %s, stack_rnn_flag = %s, thresh = %s, test mode = %s" % (model_type,word_feat_str,sent_enc_feat_str,classi_probs_label_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set,rnn_type,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag, thresh, conf_dict_com["test_mode"])
                                                         fname_part = ("%s~%s~%s~%s~%s~%s~%s~%s~%s~%s~%s~%s~%s~%s" % (model_type,word_feat_str,sent_enc_feat_str,classi_probs_label_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,rnn_type,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag, conf_dict_com["test_mode"]))
+                                                        pred_vals_across_runs = []
                                                         for run_ind in range(conf_dict_com["num_runs"]):
                                                             print('run: %s; %s\n' % (run_ind, info_str))
                                                             if run_ind < len(mod_op_list_save_list):
@@ -73,13 +74,15 @@ for conf_dict in conf_dict_list:
                                                                     mod_op_list.append((mod_op, att_op))
                                                                 mod_op_list_save_list.append(mod_op_list) 
                                                             pred_vals, true_vals, metr_dict = evaluate_model(mod_op_list, data_dict, bac_map, prob_trans_type, metr_dict, thresh, conf_dict_com['gen_att'], conf_dict_com["output_folder_name"], ("%s~%d" % (fname_part,run_ind)), conf_dict_com['classi_probs_label_info'])
-                                                            if conf_dict_com['gen_inst_res'] and run_ind == 0:
-                                                                insights_results(pred_vals, true_vals, data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], data_dict['text_sen'][data_dict['test_st_ind']:data_dict['test_en_ind']], fname_part, conf_dict_com["output_folder_name"])
+                                                            pred_vals_across_runs.append(pred_vals)
                                                         f_res.write("%s\n\n" % info_str)
                                                         print("%s\n" % info_str)
                                                         # print(metr_dict)
                                                         metr_dict = aggregate_metr(metr_dict, conf_dict_com["num_runs"], data_dict['prob_type'])
                                                         write_results(metr_dict, f_res, f_tsv, data_dict['prob_type'], model_type,word_feat_str,sent_enc_feat_str,classi_probs_label_str,prob_trans_type,class_imb_flag,num_cnn_filters,cnn_kernel_set_str,thresh,rnn_dim,att_dim,max_pool_k_val,stack_rnn_flag,rnn_type,conf_dict_com)
+                                                        if conf_dict_com['gen_insights']:                                                  
+                                                            insights_results_lab(pred_vals_across_runs, true_vals, data_dict['lab'][0:data_dict['train_en_ind']], fname_part, conf_dict_com["output_folder_name"],conf_dict_com["num_runs"],data_dict['NUM_CLASSES'],data_dict['FOR_LMAP'] )
+                                                            insights_results(pred_vals_across_runs[0], true_vals, data_dict['text'][data_dict['test_st_ind']:data_dict['test_en_ind']], data_dict['text_sen'][data_dict['test_st_ind']:data_dict['test_en_ind']], fname_part, conf_dict_com["output_folder_name"])
                                                         timeLapsed = int(time.time() - startTime + 0.5)
                                                         hrs = timeLapsed/3600.
                                                         t_str = "%.1f hours = %.1f minutes over %d hours\n" % (hrs, (timeLapsed % 3600)/60.0, int(hrs))
